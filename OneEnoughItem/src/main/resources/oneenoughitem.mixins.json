@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.mafuyu404.oneenoughitem.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "oneenoughitem.refmap.json",
+  "mixins": [
+    "CreativeModeTabMixin",
+    "ItemMixin",
+    "ItemStackMixin",
+    "SimpleJsonResourceReloadListenerMixin",
+    "TagLoaderMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

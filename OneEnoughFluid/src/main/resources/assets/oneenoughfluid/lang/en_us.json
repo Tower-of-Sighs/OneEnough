@@ -1,0 +1,11 @@
+{
+  "gui.oneenoughfluid.add_fluid": "Add Fluid",
+  "gui.oneenoughfluid.add_fluid_tag": "Add Fluid Tag",
+  "gui.oneenoughitem.data_id.fluid": "Fluid",
+  "tooltip.oneenoughfluid.item_replaced": "Replaced",
+  "tooltip.oneenoughfluid.replaced_with_tag": "Replaced with tag: %s",
+  "tooltip.oneenoughfluid.replaced_with_fluid": "Replaced with fluid: %s",
+  "tooltip.oneenoughfluid.source_runtime": "(From runtime rules)",
+  "tooltip.oneenoughfluid.source_saved": "(From saved rules)",
+  "tooltip.oneenoughfluid.item_used_as_result": "This fluid is used as a result"
+}

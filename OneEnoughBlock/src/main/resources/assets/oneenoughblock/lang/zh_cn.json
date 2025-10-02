@@ -1,0 +1,11 @@
+{
+  "gui.oneenoughblock.add_block": "添加方块",
+  "gui.oneenoughblock.add_block_tag": "添加方块标签",
+  "gui.oneenoughitem.data_id.blocks": "方块",
+  "tooltip.oneenoughblock.item_replaced": "已被替换",
+  "tooltip.oneenoughblock.replaced_with_tag": "替换为标签: %s",
+  "tooltip.oneenoughblock.replaced_with_block": "替换为方块: %s",
+  "tooltip.oneenoughblock.source_runtime": "(来自运行时规则)",
+  "tooltip.oneenoughblock.source_saved": "(来自已保存规则)",
+  "tooltip.oneenoughblock.item_used_as_result": "此方块被用作替换结果"
+}

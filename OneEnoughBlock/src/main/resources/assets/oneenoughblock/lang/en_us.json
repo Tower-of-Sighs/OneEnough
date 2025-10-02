@@ -1,0 +1,11 @@
+{
+  "gui.oneenoughblock.add_block": "Add Block",
+  "gui.oneenoughblock.add_block_tag": "Add Block Tag",
+  "gui.oneenoughitem.data_id.blocks": "Blocks",
+  "tooltip.oneenoughblock.item_replaced": "Replaced",
+  "tooltip.oneenoughblock.replaced_with_tag": "Replaced with tag: %s",
+  "tooltip.oneenoughblock.replaced_with_block": "Replaced with block: %s",
+  "tooltip.oneenoughblock.source_runtime": "(From runtime rules)",
+  "tooltip.oneenoughblock.source_saved": "(From saved rules)",
+  "tooltip.oneenoughblock.item_used_as_result": "This block is used as a result"
+}
