@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/OneEnoughBlock/OneEnough.OneEnoughBlock.main.iml" filepath="$PROJECT_DIR$/.idea/modules/OneEnoughBlock/OneEnough.OneEnoughBlock.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/OneEnoughBlock/OneEnough.OneEnoughBlock.test.iml" filepath="$PROJECT_DIR$/.idea/modules/OneEnoughBlock/OneEnough.OneEnoughBlock.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/OneEnoughFluid/OneEnough.OneEnoughFluid.main.iml" filepath="$PROJECT_DIR$/.idea/modules/OneEnoughFluid/OneEnough.OneEnoughFluid.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/OneEnoughFluid/OneEnough.OneEnoughFluid.test.iml" filepath="$PROJECT_DIR$/.idea/modules/OneEnoughFluid/OneEnough.OneEnoughFluid.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/OneEnoughItem/OneEnough.OneEnoughItem.main.iml" filepath="$PROJECT_DIR$/.idea/modules/OneEnoughItem/OneEnough.OneEnoughItem.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/OneEnoughItem/OneEnough.OneEnoughItem.test.iml" filepath="$PROJECT_DIR$/.idea/modules/OneEnoughItem/OneEnough.OneEnoughItem.test.iml" />
+    </modules>
+  </component>
+</project>

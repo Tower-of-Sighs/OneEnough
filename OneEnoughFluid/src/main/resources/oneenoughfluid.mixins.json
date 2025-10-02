@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.flechazo.oneenoughfluid.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "oneenoughfluid.refmap.json",
+  "mixins": [
+    "FluidStackMixin",
+    "TagLoaderMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
