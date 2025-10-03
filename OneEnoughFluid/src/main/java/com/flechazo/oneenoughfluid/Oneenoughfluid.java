@@ -9,7 +9,9 @@ import com.mafuyu404.oneenoughitem.api.DomainRegistry;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.util.MixinUtils;
 import com.mojang.logging.LogUtils;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
@@ -24,7 +26,9 @@ public class Oneenoughfluid {
         modEventBus.register(this);
         MixinUtils.setStrategy(new OEFReplacementStrategy());
         OEFConfig.getInstance();
-        DomainRegistry.register(new FluidDomainAdapter());
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            DomainRegistry.register(new FluidDomainAdapter());
+        });
         DataRegistry.registerWithNamespaces(Replacements.class, "oef");
         DataRegistry.registerNamespaceValidator(Replacements.class, "oef", FluidReplacementValidator.class);
     }
