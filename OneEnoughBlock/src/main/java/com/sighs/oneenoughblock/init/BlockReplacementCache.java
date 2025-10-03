@@ -2,6 +2,7 @@ package com.sighs.oneenoughblock.init;
 
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import com.sighs.oneenoughblock.Oneenoughblock;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -75,19 +76,51 @@ public class BlockReplacementCache {
         if (sourceTag != null && targetId != null) TagMapCache.put(sourceTag, targetId);
     }
 
+    public static boolean removeBlockReplacement(String blockId) {
+        if (blockId != null && BlockMapCache.containsKey(blockId)) {
+            String removed = BlockMapCache.remove(blockId);
+            BlockRulesCache.remove(blockId);
+            Oneenoughblock.LOGGER.debug("Removed fluid replacement from runtime cache: {} -> {}", blockId, removed);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean removeTagReplacement(String tagId) {
+        if (tagId != null && TagMapCache.containsKey(tagId)) {
+            String removed = TagMapCache.remove(tagId);
+            TagRulesCache.remove(tagId);
+            Oneenoughblock.LOGGER.debug("Removed tag replacement from runtime cache: {} -> {}", tagId, removed);
+            return true;
+        }
+        return false;
+    }
+
     public static void removeReplacements(Collection<String> blockIds, Collection<String> tagIds) {
         boolean changed = false;
+
         if (blockIds != null) {
-            for (String id : blockIds) {
-                if (id != null && BlockMapCache.remove(id) != null) changed = true;
+            for (String blockId : blockIds) {
+                if (removeBlockReplacement(blockId)) {
+                    changed = true;
+                }
             }
         }
+
         if (tagIds != null) {
-            for (String tag : tagIds) {
-                if (tag != null && TagMapCache.remove(tag) != null) changed = true;
+            for (String tagId : tagIds) {
+                if (removeTagReplacement(tagId)) {
+                    changed = true;
+                }
             }
+        }
+
+        if (changed) {
+            Oneenoughblock.LOGGER.info("Removed {} block replacements and {} tag replacements from runtime cache",
+                    blockIds != null ? blockIds.size() : 0, tagIds != null ? tagIds.size() : 0);
         }
     }
+
 
     public static Collection<String> trackSourceIdOf(String id) {
         Collection<String> result = new HashSet<>();
