@@ -209,6 +209,9 @@ public class BlockReplacementCache {
     }
 
     public static void endReloadOverride() {
+        if (ReloadOverrideBlockMap != null) {
+            Oneenoughblock.LOGGER.info("Disabled reload-override mapping: {} entries", ReloadOverrideBlockMap.size());
+        }
         ReloadOverrideBlockMap = null;
     }
 

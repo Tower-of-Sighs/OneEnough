@@ -7,6 +7,7 @@ import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.sighs.oneenoughblock.client.gui.cache.GlobalBlockReplacementCache;
 import com.sighs.oneenoughblock.init.BlockReplacementCache;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -23,8 +24,11 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onDataReload(DataReloadEvent event) {
         if (event.isDataType(Replacements.class)) {
+            Minecraft.getInstance().execute(() -> {
             HANDLER.rebuildReplacementCache("oeb-client-data-reload", DataManager.get(Replacements.class));
             GlobalBlockReplacementCache.get().rebuild();
+            BlockReplacementCache.endReloadOverride();
+            });
         }
     }
 

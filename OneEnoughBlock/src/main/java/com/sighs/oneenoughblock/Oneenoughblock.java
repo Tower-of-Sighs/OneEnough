@@ -6,7 +6,9 @@ import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.sighs.oneenoughblock.api.adapter.BlockDomainAdapter;
 import com.sighs.oneenoughblock.data.BlockReplacementValidator;
 import com.sighs.oneenoughblock.init.OEBConfig;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -21,7 +23,9 @@ public class Oneenoughblock {
 
     public Oneenoughblock() {
         OEBConfig.getInstance();
-        DomainRegistry.register(new BlockDomainAdapter());
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                    DomainRegistry.register(new BlockDomainAdapter());
+                });
         DataRegistry.registerWithNamespaces(Replacements.class, "oeb");
         DataRegistry.registerNamespaceValidator(Replacements.class, "oeb", BlockReplacementValidator.class);
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();

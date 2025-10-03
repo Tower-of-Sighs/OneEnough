@@ -22,7 +22,7 @@ public class ServerEventHandler {
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        HANDLER.rebuildReplacementCache("server-start", DataManager.get(Replacements.class));
+        HANDLER.rebuildReplacementCache("oeb-server-start", DataManager.get(Replacements.class));
     }
 
     @SubscribeEvent
