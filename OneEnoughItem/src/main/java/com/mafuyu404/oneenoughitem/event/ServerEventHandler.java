@@ -6,8 +6,8 @@ import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
 import com.mafuyu404.oneenoughitem.init.ItemReplacementCache;
-import com.mafuyu404.oneenoughitem.init.Utils;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -15,12 +15,12 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(modid = "oneenoughitem")
+@Mod.EventBusSubscriber(modid = Oneenoughitem.MODID)
 public class ServerEventHandler {
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        HANDLER.rebuildReplacementCache("server-start", DataManager.get(Replacements.class));
+        HANDLER.rebuildReplacementCache("oei-server-start", DataManager.get(Replacements.class));
     }
 
     @SubscribeEvent

@@ -2,7 +2,7 @@ package com.mafuyu404.oneenoughitem.client.gui.util;
 
 import com.mafuyu404.oneenoughitem.client.gui.cache.ItemGlobalReplacementCache;
 import com.mafuyu404.oneenoughitem.init.ItemReplacementCache;
-import com.mafuyu404.oneenoughitem.init.Utils;
+import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

@@ -12,8 +12,8 @@ import com.mafuyu404.oneenoughitem.client.gui.cache.AbstractGlobalReplacementCac
 import com.mafuyu404.oneenoughitem.client.gui.cache.ItemGlobalReplacementCache;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
 import com.mafuyu404.oneenoughitem.init.ItemReplacementCache;
-import com.mafuyu404.oneenoughitem.init.ReplacementControl;
-import com.mafuyu404.oneenoughitem.init.Utils;
+import com.mafuyu404.oneenoughitem.util.ReplacementControl;
+import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;

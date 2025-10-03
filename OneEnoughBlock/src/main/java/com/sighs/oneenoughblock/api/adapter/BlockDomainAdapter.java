@@ -6,7 +6,7 @@ import com.mafuyu404.oneenoughitem.api.ReplacementUiAdapter;
 import com.mafuyu404.oneenoughitem.client.gui.ReplacementEditorScreen;
 import com.mafuyu404.oneenoughitem.client.gui.cache.AbstractGlobalReplacementCache;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
-import com.mafuyu404.oneenoughitem.init.ReplacementControl;
+import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import com.sighs.oneenoughblock.Oneenoughblock;
 import com.sighs.oneenoughblock.api.adapter.ui.BlockReplacementUiAdapter;
 import com.sighs.oneenoughblock.client.gui.BlockSelectionScreen;

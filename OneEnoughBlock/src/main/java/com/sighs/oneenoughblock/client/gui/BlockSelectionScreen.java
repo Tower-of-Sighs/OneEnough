@@ -3,7 +3,7 @@ package com.sighs.oneenoughblock.client.gui;
 import com.mafuyu404.oneenoughitem.client.gui.BaseObjectSelectionScreen;
 import com.mafuyu404.oneenoughitem.client.gui.ReplacementEditorScreen;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
-import com.mafuyu404.oneenoughitem.init.ReplacementControl;
+import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;

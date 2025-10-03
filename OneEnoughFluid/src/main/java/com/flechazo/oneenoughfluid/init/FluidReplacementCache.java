@@ -1,5 +1,6 @@
 package com.flechazo.oneenoughfluid.init;
 
+import com.flechazo.oneenoughfluid.Oneenoughfluid;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import net.minecraft.resources.ResourceLocation;
@@ -61,6 +62,10 @@ public final class FluidReplacementCache {
         TagRulesCache.clear();
     }
 
+    public static boolean hasAnyMappings() {
+        return !FluidMapCache.isEmpty() || !TagMapCache.isEmpty();
+    }
+
     public static void putReplacement(Replacements replacement) {
         String result = replacement.result();
         replacement.rules().ifPresentOrElse(rules -> {
@@ -87,11 +92,59 @@ public final class FluidReplacementCache {
         });
     }
 
+
+    /**
+     * 从缓存中移除指定的物品替换
+     */
+    public static boolean removeFluidReplacement(String fluidId) {
+        if (fluidId != null && FluidMapCache.containsKey(fluidId)) {
+            String removed = FluidMapCache.remove(fluidId);
+            FluidRulesCache.remove(fluidId);
+            Oneenoughfluid.LOGGER.debug("Removed fluid replacement from runtime cache: {} -> {}", fluidId, removed);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 从缓存中移除指定的标签替换
+     */
+    public static boolean removeTagReplacement(String tagId) {
+        if (tagId != null && TagMapCache.containsKey(tagId)) {
+            String removed = TagMapCache.remove(tagId);
+            TagRulesCache.remove(tagId);
+            Oneenoughfluid.LOGGER.debug("Removed tag replacement from runtime cache: {} -> {}", tagId, removed);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 批量移除物品和标签替换
+     */
     public static void removeReplacements(Collection<String> fluidIds, Collection<String> tagIds) {
         boolean changed = false;
-        if (fluidIds != null)
-            for (String id : fluidIds) if (id != null && FluidMapCache.remove(id) != null) changed = true;
-        if (tagIds != null) for (String id : tagIds) if (id != null && TagMapCache.remove(id) != null) changed = true;
+
+        if (fluidIds != null) {
+            for (String fluidId : fluidIds) {
+                if (removeFluidReplacement(fluidId)) {
+                    changed = true;
+                }
+            }
+        }
+
+        if (tagIds != null) {
+            for (String tagId : tagIds) {
+                if (removeTagReplacement(tagId)) {
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
+            Oneenoughfluid.LOGGER.info("Removed {} fluid replacements and {} tag replacements from runtime cache",
+                    fluidIds != null ? fluidIds.size() : 0, tagIds != null ? tagIds.size() : 0);
+        }
     }
 
     public static Collection<String> trackSourceIdOf(String id) {
@@ -153,10 +206,15 @@ public final class FluidReplacementCache {
             ReloadOverrideFluidMap = null;
             return;
         }
+        Oneenoughfluid.LOGGER.info("Enabled reload-override mapping for this resource reload: {} fluid",
+                ReloadOverrideFluidMap.size());
         ReloadOverrideFluidMap = new HashMap<>(currentFluidMap);
     }
 
     public static void endReloadOverride() {
+        if (ReloadOverrideFluidMap != null) {
+            Oneenoughfluid.LOGGER.info("Disabled reload-override mapping: {} entries", ReloadOverrideFluidMap.size());
+        }
         ReloadOverrideFluidMap = null;
     }
 

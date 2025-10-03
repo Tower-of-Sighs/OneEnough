@@ -3,8 +3,8 @@ package com.mafuyu404.oneenoughitem.mixin;
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.ItemReplacementCache;
-import com.mafuyu404.oneenoughitem.init.MixinUtils;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import com.mafuyu404.oneenoughitem.util.MixinUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagEntry;
@@ -37,8 +37,8 @@ public abstract class TagLoaderMixin<T> {
             return;
         }
         try {
-            MixinUtils.ReplacementLoader.CurrentSnapshot snapshot = MixinUtils.ReplacementLoader.loadCurrentSnapshot(resourceManager, "oei");
-            Map<String, String> currentItemMap = snapshot.itemMap();
+            MixinUtils.ReplacementLoader.CurrentSnapshot snapshot = MixinUtils.ReplacementLoader.loadCurrentSnapshot(resourceManager);
+            Map<String, String> currentItemMap = snapshot.dataMap();
             if (!currentItemMap.isEmpty() && !ItemReplacementCache.hasReloadOverride()) {
                 ItemReplacementCache.beginReloadOverride(currentItemMap);
             }
@@ -62,9 +62,9 @@ public abstract class TagLoaderMixin<T> {
         Map<String, String> currentItemMap = Collections.emptyMap();
         Map<String, Replacements.Rules> currentItemRules = Collections.emptyMap();
         try {
-            MixinUtils.ReplacementLoader.CurrentSnapshot snapshot = MixinUtils.ReplacementLoader.loadCurrentSnapshot(resourceManager, "oei");
-            currentItemMap = snapshot.itemMap();
-            currentItemRules = snapshot.itemRules();
+            MixinUtils.ReplacementLoader.CurrentSnapshot snapshot = MixinUtils.ReplacementLoader.loadCurrentSnapshot(resourceManager);
+            currentItemMap = snapshot.dataMap();
+            currentItemRules = snapshot.dataRules();
         } catch (Exception e) {
             Oneenoughitem.LOGGER.warn("Tag rewrite: failed to load current replacements (will fallback to cache if empty)", e);
         }

@@ -1,7 +1,7 @@
 package com.flechazo.oneenoughfluid.mixin;
 
 import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
-import com.mafuyu404.oneenoughitem.init.ReplacementControl;
+import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BucketItem;

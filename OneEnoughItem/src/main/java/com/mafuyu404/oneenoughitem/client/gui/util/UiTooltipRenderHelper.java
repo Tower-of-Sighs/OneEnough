@@ -53,6 +53,7 @@ public class UiTooltipRenderHelper {
 
         appendReplacementTooltip(tooltip, rep, modId, keyPrefix, repNameResolver);
     }
+
     private static void appendReplacementTooltip(
             List<Component> tooltip,
             String rep,

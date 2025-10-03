@@ -1,9 +1,9 @@
-package com.mafuyu404.oneenoughitem.mixin;
+package com.flechazo.oneenoughfluid.mixin;
 
+import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
+import com.flechazo.oneenoughfluid.init.OEFConfig;
+import com.flechazo.oneenoughfluid.init.OEFReplacementStrategy;
 import com.google.gson.JsonElement;
-import com.mafuyu404.oneenoughitem.init.ItemReplacementCache;
-import com.mafuyu404.oneenoughitem.init.OEIReplacementStrategy;
-import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.JsonReloadMixinHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -26,21 +26,21 @@ public abstract class SimpleJsonResourceReloadListenerMixin {
     private String directory;
 
     @Inject(method = "prepare(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)Ljava/util/Map;", at = @At("RETURN"))
-    private void oei$replaceItemIdsInJson(ResourceManager resourceManager,
-                                          ProfilerFiller profiler,
-                                          CallbackInfoReturnable<Map<ResourceLocation, JsonElement>> cir) {
+    private void oef$replaceFluidIdsInJson(ResourceManager resourceManager,
+                                           ProfilerFiller profiler,
+                                           CallbackInfoReturnable<Map<ResourceLocation, JsonElement>> cir) {
         JsonReloadMixinHelper.processJsonReload(
                 this.directory,
                 resourceManager,
                 cir.getReturnValue(),
-                new OEIReplacementStrategy(),
-                "recipes".equals(this.directory) ? ItemReplacementCache::beginReloadOverride : null,
-                ItemReplacementCache::hasAnyMappings,
+                new OEFReplacementStrategy(),
+                "recipes".equals(this.directory) ? FluidReplacementCache::beginReloadOverride : null,
+                FluidReplacementCache::hasAnyMappings,
                 modId -> {
-                    var cfg = OEIConfig.getDefaultRules(modId);
+                    var cfg = OEFConfig.getDefaultRules(modId);
                     return cfg != null ? cfg.toRules() : null;
                 },
-                "oei"
+                "oef"
         );
     }
 }

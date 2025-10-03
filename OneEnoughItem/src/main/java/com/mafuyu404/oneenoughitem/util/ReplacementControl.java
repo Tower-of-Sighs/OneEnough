@@ -1,4 +1,4 @@
-package com.mafuyu404.oneenoughitem.init;
+package com.mafuyu404.oneenoughitem.util;
 
 import java.util.function.Supplier;
 

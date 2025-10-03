@@ -6,6 +6,7 @@
   "refmap": "oneenoughfluid.refmap.json",
   "mixins": [
     "FluidStackMixin",
+    "SimpleJsonResourceReloadListenerMixin",
     "TagLoaderMixin"
   ],
   "client": [
