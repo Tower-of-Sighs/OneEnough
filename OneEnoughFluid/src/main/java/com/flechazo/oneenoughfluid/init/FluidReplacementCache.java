@@ -93,9 +93,6 @@ public final class FluidReplacementCache {
     }
 
 
-    /**
-     * 从缓存中移除指定的物品替换
-     */
     public static boolean removeFluidReplacement(String fluidId) {
         if (fluidId != null && FluidMapCache.containsKey(fluidId)) {
             String removed = FluidMapCache.remove(fluidId);
@@ -106,9 +103,6 @@ public final class FluidReplacementCache {
         return false;
     }
 
-    /**
-     * 从缓存中移除指定的标签替换
-     */
     public static boolean removeTagReplacement(String tagId) {
         if (tagId != null && TagMapCache.containsKey(tagId)) {
             String removed = TagMapCache.remove(tagId);
@@ -119,9 +113,6 @@ public final class FluidReplacementCache {
         return false;
     }
 
-    /**
-     * 批量移除物品和标签替换
-     */
     public static void removeReplacements(Collection<String> fluidIds, Collection<String> tagIds) {
         boolean changed = false;
 

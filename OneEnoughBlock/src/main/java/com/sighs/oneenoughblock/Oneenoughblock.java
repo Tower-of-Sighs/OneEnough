@@ -9,11 +9,15 @@ import com.sighs.oneenoughblock.init.OEBConfig;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod(Oneenoughblock.MODID)
 public class Oneenoughblock {
 
     public static final String MODID = "oneenoughblock";
+
+    public static final Logger LOGGER = LogManager.getLogger();
 
     public Oneenoughblock() {
         OEBConfig.getInstance();
