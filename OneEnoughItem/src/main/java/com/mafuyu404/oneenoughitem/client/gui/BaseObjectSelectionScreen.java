@@ -3,7 +3,7 @@ package com.mafuyu404.oneenoughitem.client.gui;
 import com.mafuyu404.oneenoughitem.api.DomainRegistry;
 import com.mafuyu404.oneenoughitem.client.gui.components.ItemGridWidget;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
-import com.mafuyu404.oneenoughitem.init.ReplacementControl;
+import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;

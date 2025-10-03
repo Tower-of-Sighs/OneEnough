@@ -3,7 +3,7 @@ package com.mafuyu404.oneenoughitem.client.gui.components;
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.api.DomainRegistry;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
-import com.mafuyu404.oneenoughitem.init.ReplacementControl;
+import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

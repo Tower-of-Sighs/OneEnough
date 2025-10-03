@@ -2,8 +2,8 @@ package com.flechazo.oneenoughfluid.mixin;
 
 import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
 import com.mafuyu404.oneenoughitem.data.Replacements;
-import com.mafuyu404.oneenoughitem.init.MixinUtils;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import com.mafuyu404.oneenoughitem.util.MixinUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagLoader;
@@ -34,9 +34,9 @@ public abstract class TagLoaderMixin<T> {
         var tags = cir.getReturnValue();
         if (tags == null || tags.isEmpty()) return;
 
-        var snap = MixinUtils.ReplacementLoader.loadCurrentSnapshot(resourceManager, "oef");
-        Map<String, String> currentMap = snap.itemMap();
-        Map<String, Replacements.Rules> currentRules = snap.itemRules();
+        var snap = MixinUtils.ReplacementLoader.loadCurrentSnapshot(resourceManager);
+        Map<String, String> currentMap = snap.dataMap();
+        Map<String, Replacements.Rules> currentRules = snap.dataRules();
         final boolean fallbackEnabled = currentMap.isEmpty();
 
         Replacements.Rules defaultRules = null;

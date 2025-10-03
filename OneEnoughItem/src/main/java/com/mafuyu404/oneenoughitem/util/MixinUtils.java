@@ -1,43 +1,59 @@
-package com.mafuyu404.oneenoughitem.init;
+package com.mafuyu404.oneenoughitem.util;
 
 import com.google.gson.*;
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
+import com.mafuyu404.oneenoughitem.api.ReplacementStrategy;
 import com.mafuyu404.oneenoughitem.data.Replacements;
+import com.mafuyu404.oneenoughitem.init.AbstractReplacementStrategy;
+import com.mafuyu404.oneenoughitem.init.ItemReplacementCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.Reader;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class MixinUtils {
+    private static ReplacementStrategy STRATEGY;
+
+    public static void setStrategy(ReplacementStrategy strategy) {
+        STRATEGY = strategy;
+    }
+
+    public static ReplacementStrategy getStrategy() {
+        return STRATEGY;
+    }
+
     public record FieldRule(Set<String> keys, boolean strict) {
     }
 
     public static final class ReplaceContext {
         public final String dataType;
         public final FieldRule rule;
-        public final Map<String, String> itemMap;
-        public final Set<String> sourceItemIds;
+        public final Map<String, String> dataMap;
+        public final Set<String> sourceDataIds;
         public boolean mutated = false;
         public boolean shouldDrop = false;
         public boolean allowCacheFallback;
         public String lastMappingOrigin = "N/A";
-        public final Map<String, Replacements.Rules> itemRules;
+        public final Map<String, Replacements.Rules> dataRules;
 
         public ReplaceContext(String dataType, FieldRule rule,
-                              Map<String, String> itemMap,
-                              Set<String> sourceItemIds,
-                              Map<String, Replacements.Rules> itemRules) {
+                              Map<String, String> dataMap,
+                              Set<String> sourceDataIds,
+                              Map<String, Replacements.Rules> dataRules) {
             this.dataType = dataType;
             this.rule = rule;
-            this.itemMap = itemMap;
-            this.sourceItemIds = sourceItemIds;
-            this.itemRules = itemRules;
-            this.allowCacheFallback = (itemMap == null || itemMap.isEmpty());
+            this.dataMap = dataMap;
+            this.sourceDataIds = sourceDataIds;
+            this.dataRules = dataRules;
+            this.allowCacheFallback = (dataMap == null || dataMap.isEmpty());
         }
     }
 
@@ -78,8 +94,8 @@ public class MixinUtils {
 
     public static class TargetResolver {
         public static String resolveTarget(String id, ReplaceContext ctx) {
-            if (ctx.itemMap != null) {
-                String v = ctx.itemMap.get(id);
+            if (ctx.dataMap != null) {
+                String v = ctx.dataMap.get(id);
                 if (v != null) {
                     ctx.lastMappingOrigin = "CURRENT";
                     return v;
@@ -97,13 +113,13 @@ public class MixinUtils {
         }
 
         public static boolean isSourceIdWithCurrent(String id, ReplaceContext ctx) {
-            if (ctx.sourceItemIds != null && ctx.sourceItemIds.contains(id)) return true;
+            if (ctx.sourceDataIds != null && ctx.sourceDataIds.contains(id)) return true;
             return ctx.allowCacheFallback && ItemReplacementCache.isSourceItemId(id);
         }
     }
 
     public static class IdReplacer {
-        private static void replaceIdCommon(
+        public static void replaceIdCommon(
                 String id,
                 ReplaceContext ctx,
                 BiConsumer<String, String> logReplaceAction,
@@ -112,15 +128,20 @@ public class MixinUtils {
             String target = TargetResolver.resolveTarget(id, ctx);
             if (target == null) return;
 
+            // 先使用本次重载的规则判断是否应在该目录处理；若本次无规则且允许回落，再查缓存
             boolean shouldProcess = false;
-            if (ctx.itemRules != null) {
-                Replacements.Rules rules = ctx.itemRules.get(id);
+            if (ctx.dataRules != null) {
+                Replacements.Rules rules = ctx.dataRules.get(id);
                 if (rules != null) {
                     shouldProcess = rules.data()
                             .map(m -> m.get(ctx.dataType))
                             .map(mode -> mode == Replacements.ProcessingMode.REPLACE)
                             .orElse(false);
+                } else if (ctx.allowCacheFallback) {
+                    shouldProcess = ItemReplacementCache.shouldReplaceInDataDir(id, ctx.dataType);
                 }
+            } else if (ctx.allowCacheFallback) {
+                shouldProcess = ItemReplacementCache.shouldReplaceInDataDir(id, ctx.dataType);
             }
             if (!shouldProcess) {
                 return; // 跳过不需要处理的物品
@@ -164,22 +185,22 @@ public class MixinUtils {
     }
 
     public static class ReplacementLoader {
-        private static final List<String> REPLACEMENT_DIR_CANDIDATES = List.of("replacements");
 
-        // 重载快照：物品映射 + 规则
+        // 重载快照：映射 + 规则
         public record CurrentSnapshot(
-                Map<String, String> itemMap,
-                Map<String, Replacements.Rules> itemRules,
+                Map<String, String> dataMap,
+                Map<String, Replacements.Rules> dataRules,
                 Map<String, Replacements.Rules> tagRules
         ) {
         }
 
-        public static CurrentSnapshot loadCurrentSnapshot(ResourceManager resourceManager, String namespace) {
+        public static CurrentSnapshot loadCurrentSnapshot(ResourceManager resourceManager) {
             Map<String, String> map = new HashMap<>();
             Map<String, Replacements.Rules> itemRules = new HashMap<>();
             Map<String, Replacements.Rules> tagRules = new HashMap<>();
-            Predicate<ResourceLocation> jsonPredicate = rl -> rl.getPath().endsWith(".json") && namespace.equals(rl.getNamespace());
-            for (String baseDir : REPLACEMENT_DIR_CANDIDATES) {
+            Predicate<ResourceLocation> jsonPredicate = rl -> rl.getPath().endsWith(".json") && "oei".equals(rl.getNamespace());
+
+            for (String baseDir : AbstractReplacementStrategy.REPLACEMENT_DIR_CANDIDATES) {
                 try {
                     Map<ResourceLocation, Resource> res = resourceManager.listResources(baseDir, jsonPredicate);
                     if (res.isEmpty()) continue;
@@ -198,10 +219,10 @@ public class MixinUtils {
             return new CurrentSnapshot(map, itemRules, tagRules);
         }
 
-        private static void parseReplacementJson(JsonElement root,
-                                                 Map<String, String> outMap,
-                                                 Map<String, Replacements.Rules> outItemRules,
-                                                 Map<String, Replacements.Rules> outTagRules) {
+        public static void parseReplacementJson(JsonElement root,
+                                                Map<String, String> outMap,
+                                                Map<String, Replacements.Rules> outItemRules,
+                                                Map<String, Replacements.Rules> outTagRules) {
             if (root == null) return;
 
             if (root.isJsonArray()) {
@@ -213,9 +234,9 @@ public class MixinUtils {
 
             if (root.isJsonObject()) {
                 JsonObject obj = root.getAsJsonObject();
-                if (obj.has("match") && obj.get("match").isJsonArray() && obj.has("result")) {
-                    String result = obj.get("result").getAsString();
-                    JsonArray arr = obj.get("match").getAsJsonArray();
+                if (obj.has("matchItems") && obj.get("matchItems").isJsonArray() && obj.has("resultItems")) {
+                    String result = obj.get("resultItems").getAsString();
+                    JsonArray arr = obj.get("matchItems").getAsJsonArray();
 
                     Replacements.Rules rules = null;
                     if (obj.has("rules") && obj.get("rules").isJsonObject()) {

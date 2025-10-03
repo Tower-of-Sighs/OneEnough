@@ -4,7 +4,7 @@ import com.mafuyu404.oelib.forge.client.renderer.FluidRenderUtils;
 import com.mafuyu404.oneenoughitem.client.gui.BaseObjectSelectionScreen;
 import com.mafuyu404.oneenoughitem.client.gui.ReplacementEditorScreen;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
-import com.mafuyu404.oneenoughitem.init.ReplacementControl;
+import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

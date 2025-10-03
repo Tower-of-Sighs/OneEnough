@@ -9,9 +9,9 @@ import com.mafuyu404.oneenoughitem.client.gui.cache.ItemGlobalReplacementCache;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
 import com.mafuyu404.oneenoughitem.init.ItemReplacementCache;
-import com.mafuyu404.oneenoughitem.init.Utils;
 import com.mafuyu404.oneenoughitem.init.access.CreativeModeTabIconRefresher;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -25,7 +25,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(modid = "oneenoughitem", value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = Oneenoughitem.MODID, value = Dist.CLIENT)
 public class ClientEventHandler {
 
     @SubscribeEvent

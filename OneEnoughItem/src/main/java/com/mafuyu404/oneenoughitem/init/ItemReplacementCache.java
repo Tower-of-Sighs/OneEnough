@@ -3,6 +3,7 @@ package com.mafuyu404.oneenoughitem.init;
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 

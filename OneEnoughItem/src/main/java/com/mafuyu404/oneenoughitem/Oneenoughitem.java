@@ -5,7 +5,9 @@ import com.mafuyu404.oneenoughitem.api.DomainRegistry;
 import com.mafuyu404.oneenoughitem.api.adapter.ItemDomainAdapter;
 import com.mafuyu404.oneenoughitem.data.ItemReplacementValidator;
 import com.mafuyu404.oneenoughitem.data.Replacements;
+import com.mafuyu404.oneenoughitem.init.OEIReplacementStrategy;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import com.mafuyu404.oneenoughitem.util.MixinUtils;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -18,6 +20,7 @@ public class Oneenoughitem {
     public static final Logger LOGGER = LogManager.getLogger();
 
     public Oneenoughitem() {
+        MixinUtils.setStrategy(new OEIReplacementStrategy());
         OEIConfig.getInstance();
         DomainRegistry.register(new ItemDomainAdapter());
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);

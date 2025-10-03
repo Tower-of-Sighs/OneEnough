@@ -2,6 +2,7 @@
   "gui.oneenoughfluid.add_fluid": "添加流体",
   "gui.oneenoughfluid.add_fluid_tag": "添加流体标签",
   "gui.oneenoughitem.data_id.fluid": "流体",
+  "gui.oneenoughfluid.flowing_suffix": "(流动)",
   "tooltip.oneenoughfluid.item_replaced": "已被替换",
   "tooltip.oneenoughfluid.replaced_with_tag": "替换为标签: %s",
   "tooltip.oneenoughfluid.replaced_with_fluid": "替换为流体: %s",

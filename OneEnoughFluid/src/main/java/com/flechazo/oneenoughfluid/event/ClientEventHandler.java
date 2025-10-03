@@ -1,5 +1,6 @@
 package com.flechazo.oneenoughfluid.event;
 
+import com.flechazo.oneenoughfluid.Oneenoughfluid;
 import com.flechazo.oneenoughfluid.client.gui.cache.GlobalFluidReplacementCache;
 import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
 import com.mafuyu404.oelib.forge.data.DataManager;
@@ -7,6 +8,7 @@ import com.mafuyu404.oelib.forge.event.DataReloadEvent;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -18,13 +20,16 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(modid = "oneenoughfluid", value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = Oneenoughfluid.MODID, value = Dist.CLIENT)
 public class ClientEventHandler {
     @SubscribeEvent
     public static void onDataReload(DataReloadEvent event) {
         if (event.isDataType(Replacements.class)) {
-            HANDLER.rebuildReplacementCache("oef-client-data-reload", DataManager.get(Replacements.class));
-            GlobalFluidReplacementCache.get().rebuild();
+            Minecraft.getInstance().execute(() -> {
+                HANDLER.rebuildReplacementCache("oef-client-data-reload", DataManager.get(Replacements.class));
+                GlobalFluidReplacementCache.get().rebuild();
+                FluidReplacementCache.endReloadOverride();
+            });
         }
     }
 

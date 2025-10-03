@@ -2,6 +2,7 @@
   "gui.oneenoughfluid.add_fluid": "Add Fluid",
   "gui.oneenoughfluid.add_fluid_tag": "Add Fluid Tag",
   "gui.oneenoughitem.data_id.fluid": "Fluid",
+  "gui.oneenoughfluid.flowing_suffix": "(Flowing)",
   "tooltip.oneenoughfluid.item_replaced": "Replaced",
   "tooltip.oneenoughfluid.replaced_with_tag": "Replaced with tag: %s",
   "tooltip.oneenoughfluid.replaced_with_fluid": "Replaced with fluid: %s",

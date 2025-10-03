@@ -1,5 +1,6 @@
 package com.flechazo.oneenoughfluid.event;
 
+import com.flechazo.oneenoughfluid.Oneenoughfluid;
 import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
 import com.mafuyu404.oelib.forge.data.DataManager;
 import com.mafuyu404.oelib.forge.event.DataReloadEvent;
@@ -17,18 +18,19 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(modid = "oneenoughfluid")
+@Mod.EventBusSubscriber(modid = Oneenoughfluid.MODID)
 public class ServerEventHandler {
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        HANDLER.rebuildReplacementCache("server-start", DataManager.get(Replacements.class));
+        HANDLER.rebuildReplacementCache("oef-server-start", DataManager.get(Replacements.class));
     }
 
     @SubscribeEvent
     public static void onDataReload(DataReloadEvent event) {
         if (event.isDataType(Replacements.class)) {
             HANDLER.rebuildReplacementCache("oef-server-data-reload", DataManager.get(Replacements.class));
+            FluidReplacementCache.endReloadOverride();
         }
     }
 
