@@ -3,16 +3,23 @@ package com.sighs.oneenoughblock.init;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
 import net.minecraftforge.registries.tags.ITagManager;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Utils {
+
+    public static <T extends Comparable<T>> BlockState saveState(BlockState from, BlockState to) {
+        for (Map.Entry<Property<?>, Comparable<?>> entry :  from.getValues().entrySet()) {
+            to = to.trySetValue((Property<T>) entry.getKey(), (T) entry.getValue());
+        }
+        return to;
+    }
+
     public static String getBlockRegistryName(Block block) {
         if (block == null) return null;
         ResourceLocation id = ForgeRegistries.BLOCKS.getKey(block);

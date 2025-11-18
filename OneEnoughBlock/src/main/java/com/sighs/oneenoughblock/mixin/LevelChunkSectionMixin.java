@@ -1,6 +1,7 @@
 package com.sighs.oneenoughblock.mixin;
 
 import com.sighs.oneenoughblock.init.BlockReplacementCache;
+import com.sighs.oneenoughblock.init.Utils;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
@@ -24,13 +25,13 @@ public abstract class LevelChunkSectionMixin {
     public void setBlockState(int x, int y, int z, BlockState state, boolean useLocks, CallbackInfoReturnable<BlockState> cir) {
         BlockReplacementCache.resolveTarget(state.getBlock()).ifPresent(target -> {
             if (!state.is(target)) {
-                cir.setReturnValue(setBlockState(x, y, z, target.defaultBlockState(), useLocks));
+                cir.setReturnValue(setBlockState(x, y, z, Utils.saveState(state, target.defaultBlockState()), useLocks));
             }
         });
         // 标签替换
         BlockReplacementCache.resolveTargetByTags(state.getBlock()).ifPresent(target -> {
             if (!state.is(target)) {
-                cir.setReturnValue(setBlockState(x, y, z, target.defaultBlockState(), useLocks));
+                cir.setReturnValue(setBlockState(x, y, z, Utils.saveState(state, target.defaultBlockState()), useLocks));
             }
         });
     }
