@@ -23,9 +23,9 @@ public class Oneenoughblock {
 
     public Oneenoughblock() {
         OEBConfig.getInstance();
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                    DomainRegistry.register(new BlockDomainAdapter());
-                });
+
+        DomainRegistry.register(new BlockDomainAdapter());
+
         DataRegistry.registerWithNamespaces(Replacements.class, "oeb");
         DataRegistry.registerNamespaceValidator(Replacements.class, "oeb", BlockReplacementValidator.class);
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();

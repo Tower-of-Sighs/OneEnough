@@ -21,6 +21,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
@@ -52,11 +54,13 @@ public class ItemDomainAdapter implements DomainAdapter {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createObjectSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new ItemSelectionScreen(parent, isForMatch);
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createTagSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new ItemTagSelectionScreen(parent, isForMatch);
     }
@@ -114,6 +118,7 @@ public class ItemDomainAdapter implements DomainAdapter {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void renderDataId(GuiGraphics graphics, String dataId, int x, int y) {
         var stack = iconForDataId(dataId);
         GuiUtils.drawItemBox(graphics, x, y, 18, 18);

@@ -8,8 +8,6 @@ import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.OEIReplacementStrategy;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.MixinUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -24,9 +22,9 @@ public class Oneenoughitem {
     public Oneenoughitem() {
         MixinUtils.setStrategy(new OEIReplacementStrategy());
         OEIConfig.getInstance();
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-             DomainRegistry.register(new ItemDomainAdapter());
-        });
+
+        DomainRegistry.register(new ItemDomainAdapter());
+
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
     }
 
