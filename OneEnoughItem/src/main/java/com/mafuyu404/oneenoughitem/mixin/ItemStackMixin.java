@@ -32,7 +32,7 @@ public abstract class ItemStackMixin {
     private Item item;
 
     @Mutable
-    @Shadow
+    @Shadow(remap = false)
     @Final
     @org.jetbrains.annotations.Nullable
     private Holder.Reference<Item> delegate;
