@@ -3,6 +3,7 @@ package com.mafuyu404.oneenoughitem.client.gui;
 import com.mafuyu404.oneenoughitem.api.DomainRegistry;
 import com.mafuyu404.oneenoughitem.client.gui.components.ItemGridWidget;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
+import com.mafuyu404.oneenoughitem.util.JECHCompat;
 import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -54,6 +55,10 @@ public abstract class BaseObjectSelectionScreen<T> extends Screen {
     protected abstract List<T> loadAllObjects();
 
     protected abstract String getId(T obj);
+
+    protected String getName(T obj) {
+        return getId(obj);
+    }
 
     protected abstract void renderObject(T obj, GuiGraphics graphics, int x, int y);
 
@@ -173,8 +178,12 @@ public abstract class BaseObjectSelectionScreen<T> extends Screen {
         } else {
             this.filteredObjects = this.allObjects.stream()
                     .filter(obj -> {
+                        String id = Optional.ofNullable(getName(obj)).orElse("").toLowerCase();
+                        return JECHCompat.contains(id,search);
+                        /*
                         String id = Optional.ofNullable(getId(obj)).orElse("").toLowerCase();
                         return id.contains(search);
+                         */
                     }).toList();
         }
     }

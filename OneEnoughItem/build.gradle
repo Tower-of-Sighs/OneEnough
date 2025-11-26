@@ -148,6 +148,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    compileOnly fg.deobf("curse.maven:just-enough-characters-250702:7176519")
 }
 
 
