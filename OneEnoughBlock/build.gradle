@@ -24,7 +24,7 @@ group = mod_group_id
 version = mod_version
 
 base {
-    archivesName = mod_id
+    archivesName = mod_name
 }
 
 java {
@@ -133,7 +133,7 @@ mixin {
     config "${mod_id}.mixins.json"
 
     // 引入依赖模块 OneEnoughItem 的 mixin 配置与 refmap
-    add project(":OneEnoughItem").sourceSets.main, "oneenoughitem.refmap.json"
+    //add project(":OneEnoughItem").sourceSets.main, "oneenoughitem.refmap.json"
     config "oneenoughitem.mixins.json"
 }
 

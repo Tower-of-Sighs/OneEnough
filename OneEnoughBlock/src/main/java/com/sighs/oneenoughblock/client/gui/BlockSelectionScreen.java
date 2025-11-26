@@ -47,6 +47,11 @@ public class BlockSelectionScreen extends BaseObjectSelectionScreen<Block> {
     }
 
     @Override
+    protected String getName(Block obj) {
+        return obj.getName().getString();
+    }
+
+    @Override
     protected void renderObject(Block obj, GuiGraphics graphics, int x, int y) {
         ItemStack stack = ReplacementControl.withSkipReplacement(() -> new ItemStack(obj.asItem()));
         GuiUtils.drawItemBox(graphics, x, y, 18, 18);
