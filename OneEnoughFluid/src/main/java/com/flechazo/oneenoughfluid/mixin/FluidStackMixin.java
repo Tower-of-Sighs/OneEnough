@@ -20,14 +20,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FluidStack.class)
 public abstract class FluidStackMixin {
-    @Shadow
+    @Shadow(remap = false)
     @Mutable
     private Holder.Reference<Fluid> fluidDelegate;
 
-    @Shadow
+    @Shadow(remap = false)
     public abstract Fluid getFluid();
 
-    @Inject(method = "<init>(Lnet/minecraft/world/level/material/Fluid;I)V", at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/world/level/material/Fluid;I)V", at = @At("RETURN"),remap = false)
     private void oef$replaceOnInit(Fluid fluid, int amount, CallbackInfo ci) {
         if (fluid == null || fluid == Fluids.EMPTY) return;
         if (ReplacementControl.shouldSkipReplacement()) return;

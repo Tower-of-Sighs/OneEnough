@@ -48,6 +48,11 @@ public class FluidSelectionScreen extends BaseObjectSelectionScreen<Fluid> {
     }
 
     @Override
+    protected String getName(Fluid obj) {
+        return obj.getFluidType().getDescription().getString();
+    }
+
+    @Override
     protected void renderObject(Fluid obj, GuiGraphics graphics, int x, int y) {
         GuiUtils.drawItemBox(graphics, x, y, 18, 18);
 
