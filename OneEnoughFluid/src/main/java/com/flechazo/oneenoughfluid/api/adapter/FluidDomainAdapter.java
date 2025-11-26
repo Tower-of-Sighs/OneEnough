@@ -21,6 +21,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -54,11 +56,13 @@ public class FluidDomainAdapter implements DomainAdapter {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createObjectSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new FluidSelectionScreen(parent, isForMatch);
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createTagSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new FluidTagSelectionScreen(parent, isForMatch);
     }
@@ -115,6 +119,7 @@ public class FluidDomainAdapter implements DomainAdapter {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public ItemStack iconForDataId(String dataId) {
         var rl = ResourceLocation.tryParse(dataId);
         var fluid = rl != null ? ForgeRegistries.FLUIDS.getValue(rl) : null;

@@ -7,6 +7,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public interface DomainAdapter {
     String modId();
@@ -19,8 +21,10 @@ public interface DomainAdapter {
 
     Component selectTagLabel();
 
+    @OnlyIn(Dist.CLIENT)
     Screen createObjectSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch);
 
+    @OnlyIn(Dist.CLIENT)
     Screen createTagSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch);
 
     boolean isAvailable();
@@ -33,6 +37,7 @@ public interface DomainAdapter {
 
     ItemStack iconForDataId(String dataId);
 
+    @OnlyIn(Dist.CLIENT)
     void renderDataId(GuiGraphics graphics, String dataId, int x, int y);
 
     Component displayName(String dataId);

@@ -26,9 +26,9 @@ public class Oneenoughfluid {
         modEventBus.register(this);
         MixinUtils.setStrategy(new OEFReplacementStrategy());
         OEFConfig.getInstance();
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            DomainRegistry.register(new FluidDomainAdapter());
-        });
+
+        DomainRegistry.register(new FluidDomainAdapter());
+
         DataRegistry.registerWithNamespaces(Replacements.class, "oef");
         DataRegistry.registerNamespaceValidator(Replacements.class, "oef", FluidReplacementValidator.class);
     }
