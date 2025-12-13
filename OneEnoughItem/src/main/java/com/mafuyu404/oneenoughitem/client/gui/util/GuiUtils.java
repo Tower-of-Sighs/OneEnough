@@ -1,5 +1,6 @@
 package com.mafuyu404.oneenoughitem.client.gui.util;
 
+import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -8,11 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 public class GuiUtils {
-    private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation("oneenoughitem", "textures/gui/background.png");
-    private static final ResourceLocation BUTTON_NORMAL_TEXTURE = new ResourceLocation("oneenoughitem", "textures/gui/button_0.png");
-    private static final ResourceLocation BUTTON_PRESSED_TEXTURE = new ResourceLocation("oneenoughitem", "textures/gui/button_1.png");
-    private static final ResourceLocation EDITOR_TEXTURE = new ResourceLocation("oneenoughitem", "textures/gui/editor.png");
-    private static final ResourceLocation ITEM_BOX_TEXTURE = new ResourceLocation("oneenoughitem", "textures/gui/item_box.png");
+    private static final ResourceLocation BACKGROUND_TEXTURE = ResourceLocation.fromNamespaceAndPath(Oneenoughitem.MODID, "textures/gui/background.png");
+    private static final ResourceLocation BUTTON_NORMAL_TEXTURE = ResourceLocation.fromNamespaceAndPath(Oneenoughitem.MODID, "textures/gui/button_0.png");
+    private static final ResourceLocation BUTTON_PRESSED_TEXTURE = ResourceLocation.fromNamespaceAndPath(Oneenoughitem.MODID, "textures/gui/button_1.png");
+    private static final ResourceLocation EDITOR_TEXTURE = ResourceLocation.fromNamespaceAndPath(Oneenoughitem.MODID, "textures/gui/editor.png");
+    private static final ResourceLocation ITEM_BOX_TEXTURE = ResourceLocation.fromNamespaceAndPath(Oneenoughitem.MODID, "textures/gui/item_box.png");
 
 
     public static void drawTiledBackground(GuiGraphics graphics, int x, int y, int width, int height) {

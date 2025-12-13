@@ -19,11 +19,10 @@ public class TagListWidget extends ObjectSelectionList<TagListWidget.TagEntry> {
     private Set<ResourceLocation> selectedTags = Collections.emptySet();
 
     public TagListWidget(Minecraft minecraft, int width, int height, int y, int itemHeight, Consumer<ResourceLocation> onTagSelect) {
-        super(minecraft, width, height, y, y + height, itemHeight);
-        this.setRenderBackground(false);
-        this.setRenderTopAndBottom(false);
+        super(minecraft, width, height, y, itemHeight);
         this.onTagSelect = onTagSelect;
     }
+
 
     public void setTags(List<ResourceLocation> tags) {
         this.clearEntries();
@@ -32,15 +31,15 @@ public class TagListWidget extends ObjectSelectionList<TagListWidget.TagEntry> {
         }
     }
 
-    public void setSelectedTags(Set<ResourceLocation> selectedTags) {
+    public void setSelectedTags(java.util.Set<ResourceLocation> selectedTags) {
         this.selectedTags = selectedTags != null ? selectedTags : Collections.emptySet();
     }
 
     public TagEntry getEntryAtMouse(double mouseX, double mouseY) {
-        if (mouseX >= this.x0 && mouseX <= this.x0 + this.width &&
-                mouseY >= this.y0 && mouseY <= this.y0 + this.height) {
+        if (mouseX >= this.getX() && mouseX <= this.getX() + this.width &&
+                mouseY >= this.getY() && mouseY <= this.getY() + this.height) {
 
-            int relativeY = (int) (mouseY - this.y0 + this.getScrollAmount());
+            int relativeY = (int) (mouseY - this.getY() + this.getScrollAmount());
             int index = relativeY / this.itemHeight;
 
             if (index >= 0 && index < this.children().size()) {

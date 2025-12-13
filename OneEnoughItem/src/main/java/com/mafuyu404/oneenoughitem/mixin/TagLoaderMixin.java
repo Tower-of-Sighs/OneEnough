@@ -28,7 +28,7 @@ public abstract class TagLoaderMixin<T> {
     @Final
     private String directory;
 
-    private static final String ITEMS_TAG_DIR = "tags/items";
+    private static final String ITEMS_TAG_DIR = "tags/item";
 
     @Inject(method = "load(Lnet/minecraft/server/packs/resources/ResourceManager;)Ljava/util/Map;", at = @At("HEAD"))
     private void oei$beginOverrideForTags(ResourceManager resourceManager,
@@ -148,6 +148,6 @@ public abstract class TagLoaderMixin<T> {
 
     private String getTagType(String directory) {
         // 仅在 item 域处理 items 标签
-        return ITEMS_TAG_DIR.equals(directory) ? "items" : null;
+        return ITEMS_TAG_DIR.equals(directory) ? "item" : null;
     }
 }

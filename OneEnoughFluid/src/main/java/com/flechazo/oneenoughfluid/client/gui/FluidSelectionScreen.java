@@ -1,19 +1,20 @@
 package com.flechazo.oneenoughfluid.client.gui;
 
-import com.mafuyu404.oelib.forge.client.renderer.FluidRenderUtils;
+import com.mafuyu404.oelib.client.renderer.FluidRenderers;
 import com.mafuyu404.oneenoughitem.client.gui.BaseObjectSelectionScreen;
 import com.mafuyu404.oneenoughitem.client.gui.ReplacementEditorScreen;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
 import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidUtil;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,7 +36,7 @@ public class FluidSelectionScreen extends BaseObjectSelectionScreen<Fluid> {
 
     @Override
     protected List<Fluid> loadAllObjects() {
-        return ForgeRegistries.FLUIDS.getValues().stream()
+        return BuiltInRegistries.FLUID.stream()
                 .filter(f -> f != Fluids.EMPTY)
                 .filter(f -> f.defaultFluidState().isSource())
                 .collect(Collectors.toList());
@@ -43,34 +44,39 @@ public class FluidSelectionScreen extends BaseObjectSelectionScreen<Fluid> {
 
     @Override
     protected String getId(Fluid obj) {
-        var key = ForgeRegistries.FLUIDS.getKey(obj);
-        return key != null ? key.toString() : null;
+        var key = BuiltInRegistries.FLUID.getKey(obj);
+        return key.toString();
+    }
+
+    @Override
+    protected String getName(Fluid obj) {
+        return obj.getFluidType().getDescription().getString();
     }
 
     @Override
     protected void renderObject(Fluid obj, GuiGraphics graphics, int x, int y) {
         GuiUtils.drawItemBox(graphics, x, y, 18, 18);
-
+        long capacity = FluidType.BUCKET_VOLUME;
         FluidStack stack = new FluidStack(obj, 1000);
-        FluidRenderUtils.renderFluid(graphics, stack, x + 1, y + 1, 16, 16);
+        FluidRenderers.render(graphics, stack, stack.getAmount(), capacity, x + 1, y + 1, 16, 16);
     }
 
     @Override
     protected void onSelectSingle(String id) {
         var key = ResourceLocation.tryParse(id);
-        Fluid fluid = key != null ? ForgeRegistries.FLUIDS.getValue(key) : null;
+        Fluid fluid = key != null ? BuiltInRegistries.FLUID.get(key) : null;
         String fluidId = null;
         if (fluid != null && fluid != Fluids.EMPTY) {
-            fluidId = Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(fluid)).toString();
+            fluidId = Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(fluid)).toString();
         } else {
             var itemKey = ResourceLocation.tryParse(id);
-            var item = itemKey != null ? ForgeRegistries.ITEMS.getValue(itemKey) : null;
+            var item = itemKey != null ? BuiltInRegistries.ITEM.get(itemKey) : null;
             if (item != null) {
                 var contained = ReplacementControl.withSkipReplacement(() ->
                         FluidUtil.getFluidContained(new ItemStack(item)).orElse(FluidStack.EMPTY));
                 if (!contained.isEmpty() && contained.getFluid() != Fluids.EMPTY) {
-                    var fk = ForgeRegistries.FLUIDS.getKey(contained.getFluid());
-                    if (fk != null) fluidId = fk.toString();
+                    var fk = BuiltInRegistries.FLUID.getKey(contained.getFluid());
+                    fluidId = fk.toString();
                 }
             }
         }
@@ -83,7 +89,7 @@ public class FluidSelectionScreen extends BaseObjectSelectionScreen<Fluid> {
     @Override
     protected boolean isSelectable(String id, boolean forMatch) {
         var rl = ResourceLocation.tryParse(id);
-        Fluid fluid = rl != null ? ForgeRegistries.FLUIDS.getValue(rl) : null;
+        Fluid fluid = rl != null ? BuiltInRegistries.FLUID.get(rl) : null;
         return fluid != null && fluid != Fluids.EMPTY;
     }
 
@@ -93,11 +99,11 @@ public class FluidSelectionScreen extends BaseObjectSelectionScreen<Fluid> {
             case NAME -> Comparator.comparing(f -> {
                 ItemStack bucket = ReplacementControl.withSkipReplacement(() ->
                         FluidUtil.getFilledBucket(new FluidStack(f, 1000)));
-                return bucket.isEmpty() ? (ForgeRegistries.FLUIDS.getKey(f).toString()) : bucket.getHoverName().getString();
+                return bucket.isEmpty() ? (BuiltInRegistries.FLUID.getKey(f).toString()) : bucket.getHoverName().getString();
             });
             case MOD ->
-                    Comparator.comparing(f -> Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(f)).getNamespace());
-            case ID -> Comparator.comparing(f -> Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(f)).toString());
+                    Comparator.comparing(f -> Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(f)).getNamespace());
+            case ID -> Comparator.comparing(f -> Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(f)).toString());
         };
     }
 

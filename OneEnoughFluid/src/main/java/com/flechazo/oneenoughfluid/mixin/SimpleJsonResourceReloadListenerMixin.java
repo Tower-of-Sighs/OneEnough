@@ -34,7 +34,7 @@ public abstract class SimpleJsonResourceReloadListenerMixin {
                 resourceManager,
                 cir.getReturnValue(),
                 new OEFReplacementStrategy(),
-                "recipes".equals(this.directory) ? FluidReplacementCache::beginReloadOverride : null,
+                "recipe".equals(this.directory) ? FluidReplacementCache::beginReloadOverride : null,
                 FluidReplacementCache::hasAnyMappings,
                 modId -> {
                     var cfg = OEFConfig.getDefaultRules(modId);

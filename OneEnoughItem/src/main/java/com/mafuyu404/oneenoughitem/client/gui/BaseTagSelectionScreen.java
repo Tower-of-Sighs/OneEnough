@@ -57,7 +57,7 @@ public abstract class BaseTagSelectionScreen extends Screen {
         this.addRenderableWidget(this.searchBox);
 
         this.tagList = new TagListWidget(this.minecraft, this.width - 40, this.height - 100, 40, 22, this::handleTagClick);
-        this.tagList.setLeftPos(20);
+        this.tagList.setX(20);
         this.tagList.setSelectedTags(this.selectedTags);
         this.addRenderableWidget(this.tagList);
 

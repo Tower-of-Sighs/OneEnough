@@ -4,6 +4,7 @@ import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.Utils;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ItemReplacementCache {
     private static final ConcurrentHashMap<String, String> ItemMapCache = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, String> TagMapCache = new ConcurrentHashMap<>();
+    private static final Map<String, Set<String>> ResultToSources = new HashMap<>();
     private static final ConcurrentHashMap<String, Replacements.Rules> ItemRulesCache = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Replacements.Rules> TagRulesCache = new ConcurrentHashMap<>();
     private static volatile Map<String, String> ReloadOverrideItemMap = null;
@@ -74,33 +76,66 @@ public class ItemReplacementCache {
                 .orElse(false);
     }
 
-    public static void putReplacement(Replacements replacement) {
-        List<Item> resolvedItems = Utils.resolveItemList(replacement.match());
+    private static void addMapping(String sourceItemId, String resultItemId) {
+        String prev = ItemMapCache.put(sourceItemId, resultItemId);
+        if (prev != null && !prev.equals(resultItemId)) {
+            Set<String> prevSources = ResultToSources.get(prev);
+            if (prevSources != null) {
+                prevSources.remove(sourceItemId);
+                if (prevSources.isEmpty()) {
+                    ResultToSources.remove(prev);
+                }
+            }
+        }
+        ResultToSources.computeIfAbsent(resultItemId, k -> new HashSet<>()).add(sourceItemId);
+    }
 
-        for (Item item : resolvedItems) {
-            String id = Utils.getItemRegistryName(item);
-            if (id != null) {
-                ItemMapCache.put(id, replacement.result());
-                replacement.rules().ifPresent(rules -> ItemRulesCache.put(id, rules));
-                Oneenoughitem.LOGGER.debug("Added item replacement mapping: {} -> {}", id, replacement.result());
+
+    public static void putReplacement(Replacements replacement, HolderLookup.RegistryLookup<Item> registryLookup) {
+        List<Item> resolvedItems = Collections.emptyList();
+        int directCount = 0;
+        int tagCount = (int) replacement.match().stream().filter(s -> s != null && s.startsWith("#")).count();
+
+        if (registryLookup != null) {
+            resolvedItems = Utils.resolveItemList(replacement.match(), registryLookup);
+
+            for (Item item : resolvedItems) {
+                String id = Utils.getItemRegistryName(item);
+                if (id != null) {
+                    ItemMapCache.put(id, replacement.result());
+                    // 存储规则
+                    replacement.rules().ifPresent(rules -> ItemRulesCache.put(id, rules));
+                    Oneenoughitem.LOGGER.debug("Added item replacement mapping: {} -> {}", id, replacement.result());
+                }
+            }
+
+            for (String matchItem : replacement.match()) {
+                if (matchItem != null && matchItem.startsWith("#")) {
+                    String tagId = matchItem.substring(1);
+                    TagMapCache.put(tagId, replacement.result());
+                    replacement.rules().ifPresent(rules -> TagRulesCache.put(tagId, rules));
+                    Oneenoughitem.LOGGER.debug("Added tag replacement mapping: {} -> {}", tagId, replacement.result());
+                }
+            }
+        } else {
+            for (String matchItem : replacement.match()) {
+                if (matchItem != null && !matchItem.isEmpty() && !matchItem.startsWith("#")) {
+                    addMapping(matchItem, replacement.result());
+                    directCount++;
+                    Oneenoughitem.LOGGER.debug("Added item replacement mapping (no-registry): {} -> {}", matchItem, replacement.result());
+                }
+            }
+            if (tagCount > 0) {
+                Oneenoughitem.LOGGER.debug("Deferred {} tag mappings until registry becomes available", tagCount);
             }
         }
 
-        for (String matchItem : replacement.match()) {
-            if (matchItem.startsWith("#")) {
-                String tagId = matchItem.substring(1);
-                TagMapCache.put(tagId, replacement.result());
-                replacement.rules().ifPresent(rules -> TagRulesCache.put(tagId, rules));
-                Oneenoughitem.LOGGER.debug("Added tag replacement mapping: {} -> {}", tagId, replacement.result());
-            }
-        }
-
-        if (resolvedItems.isEmpty() && replacement.match().stream().noneMatch(s -> s.startsWith("#"))) {
+        int itemCount = (registryLookup != null) ? resolvedItems.size() : directCount;
+        if (itemCount == 0 && tagCount == 0) {
             Oneenoughitem.LOGGER.warn("No valid items or tags resolved from match: {}", replacement.match());
         } else {
-            int tagCount = (int) replacement.match().stream().filter(s -> s.startsWith("#")).count();
             Oneenoughitem.LOGGER.info("Added replacement rule for {} items and {} tags: {} -> {}",
-                    resolvedItems.size(), tagCount, replacement.match(), replacement.result());
+                    itemCount, tagCount, replacement.match(), replacement.result());
         }
     }
 
@@ -125,6 +160,7 @@ public class ItemReplacementCache {
         TagMapCache.clear();
         ItemRulesCache.clear();
         TagRulesCache.clear();
+        ResultToSources.clear();
         if (previousItemSize > 0 || previousTagSize > 0) {
             Oneenoughitem.LOGGER.info("Cleared {} cached item mappings and {} cached tag mappings",
                     previousItemSize, previousTagSize);

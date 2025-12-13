@@ -18,6 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -104,7 +105,7 @@ public class ReplacementEditorScreen extends Screen {
             }
 
             for (String tagId : cache.matchTags()) {
-                ResourceLocation id = new ResourceLocation(tagId);
+                ResourceLocation id = ResourceLocation.parse(tagId);
                 this.manager.addMatchTag(id);
                 TagDisplayWidget widget = new TagDisplayWidget(0, 0, id,
                         button -> this.removeMatchTag(id));
@@ -117,7 +118,7 @@ public class ReplacementEditorScreen extends Screen {
             }
 
             if (cache.resultTag() != null) {
-                ResourceLocation id = new ResourceLocation(cache.resultTag());
+                ResourceLocation id = ResourceLocation.parse(cache.resultTag());
                 this.manager.setResultTag(id);
                 this.resultTagWidget = new TagDisplayWidget(0, 0, id, null);
             }
@@ -376,10 +377,10 @@ public class ReplacementEditorScreen extends Screen {
         int leftEditorX = leftPanelX + EDITOR_SHIFT_X;
         int rightEditorX = rightPanelX + EDITOR_SHIFT_X;
 
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+
         GuiUtils.drawEditorPanel(graphics, leftEditorX, editorY, editorW, editorH);
         GuiUtils.drawEditorPanel(graphics, rightEditorX, editorY, editorW, editorH);
-
-        super.render(graphics, mouseX, mouseY, partialTick);
 
         graphics.drawCenteredString(Minecraft.getInstance().font, this.title,
                 centerX, 20, 0xFFFFFF);
@@ -440,6 +441,9 @@ public class ReplacementEditorScreen extends Screen {
         }
         if (this.showDomainDropdown && this.domainDropdownPanel != null) {
             this.domainDropdownPanel.render(graphics, mouseX, mouseY, partialTick);
+        }
+        for (Renderable renderable : this.renderables) {
+            renderable.render(graphics, mouseX, mouseY, partialTick);
         }
     }
 
@@ -766,17 +770,17 @@ public class ReplacementEditorScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (this.showObjectDropdown && this.objectDropdownPanel != null) {
-            if (this.objectDropdownPanel.mouseScrolled(mouseX, mouseY, delta)) {
+            if (this.objectDropdownPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
                 return true;
             }
         }
         if (this.showObjectDropdown && this.domainDropdownPanel != null) {
-            if (this.domainDropdownPanel.mouseScrolled(mouseX, mouseY, delta)) {
+            if (this.domainDropdownPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
                 return true;
             }
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 }

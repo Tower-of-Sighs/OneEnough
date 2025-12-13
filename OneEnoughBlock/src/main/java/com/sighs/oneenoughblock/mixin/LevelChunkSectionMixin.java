@@ -1,6 +1,7 @@
 package com.sighs.oneenoughblock.mixin;
 
 import com.sighs.oneenoughblock.init.BlockReplacementCache;
+import com.sighs.oneenoughblock.init.Utils;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
@@ -20,20 +21,26 @@ public abstract class LevelChunkSectionMixin {
     @Shadow
     public abstract BlockState setBlockState(int x, int y, int z, BlockState state, boolean useLocks);
 
-    @Inject(method = "setBlockState(IIILnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;", at = @At("HEAD"), cancellable = true)
-    public void setBlockState(int x, int y, int z, BlockState state, boolean useLocks, CallbackInfoReturnable<BlockState> cir) {
-        BlockReplacementCache.resolveTarget(state.getBlock()).ifPresent(target -> {
-            if (!state.is(target)) {
-                cir.setReturnValue(setBlockState(x, y, z, target.defaultBlockState(), useLocks));
-            }
-        });
-        // 标签替换
-        BlockReplacementCache.resolveTargetByTags(state.getBlock()).ifPresent(target -> {
-            if (!state.is(target)) {
-                cir.setReturnValue(setBlockState(x, y, z, target.defaultBlockState(), useLocks));
-            }
-        });
+    @Inject(
+            method = "setBlockState(IIILnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void setBlockState(
+            int x, int y, int z,
+            BlockState state,
+            boolean useLocks,
+            CallbackInfoReturnable<BlockState> cir
+    ) {
+        BlockReplacementCache.resolveTarget(state.getBlock(), null)
+                .filter(target -> !state.is(target))
+                .ifPresent(target -> {
+                    cir.setReturnValue(
+                            setBlockState(x, y, z, Utils.saveState(state, target.defaultBlockState()), useLocks)
+                    );
+                });
     }
+
 
 //    @Inject(method = "getBlockState", at = @At("HEAD"))
 //    public void getBlockState(int x, int y, int z, CallbackInfoReturnable<BlockState> cir) {

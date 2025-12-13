@@ -136,9 +136,9 @@ public class OEFReplacementStrategy extends AbstractReplacementStrategy {
     @Override
     public MixinUtils.FieldRule getDataDirFieldRule(String directory) {
         return switch (directory) {
-            case "recipes" -> new MixinUtils.FieldRule(Set.of("fluid", "id", "result", "result_fluid"), true);
-            case "advancements" -> new MixinUtils.FieldRule(Set.of("fluid", "result_fluid"), true);
-            case "loot_tables" -> new MixinUtils.FieldRule(Set.of("name", "result_fluid", "fluid"), true);
+            case "recipe" -> new MixinUtils.FieldRule(Set.of("fluid", "id", "result", "result_fluid"), true);
+            case "advancement" -> new MixinUtils.FieldRule(Set.of("fluid", "result_fluid"), true);
+            case "loot_table" -> new MixinUtils.FieldRule(Set.of("name", "result_fluid", "fluid"), true);
             default -> new MixinUtils.FieldRule(Set.of("fluid", "id", "result", "result_fluid"), false);
         };
     }

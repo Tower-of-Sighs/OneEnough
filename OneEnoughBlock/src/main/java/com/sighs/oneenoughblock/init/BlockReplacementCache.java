@@ -3,9 +3,12 @@ package com.sighs.oneenoughblock.init;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.sighs.oneenoughblock.Oneenoughblock;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +19,7 @@ public class BlockReplacementCache {
     private static final ConcurrentHashMap<String, Replacements.Rules> BlockRulesCache = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Replacements.Rules> TagRulesCache = new ConcurrentHashMap<>();
     private static volatile Map<String, String> ReloadOverrideBlockMap = null;
+    private static final Map<Block, Block> CACHE = new ConcurrentHashMap<>();
 
     public static String matchBlock(String id) {
         return Objects.requireNonNullElse(ReloadOverrideBlockMap, BlockMapCache).getOrDefault(id, null);
@@ -41,32 +45,53 @@ public class BlockReplacementCache {
         return id != null && Objects.requireNonNullElse(ReloadOverrideBlockMap, BlockMapCache).containsKey(id);
     }
 
+    public static Optional<Block> resolveTarget(
+            Block source,
+            HolderLookup.RegistryLookup<Block> lookup
+    ) {
+        return Optional.ofNullable(
+                CACHE.computeIfAbsent(source, b -> resolveInternal(b, lookup))
+        );
+    }
+
+    private static Block resolveInternal(Block source, HolderLookup.RegistryLookup<Block> lookup) {
+        var direct = resolveTarget(source);
+        return direct.orElseGet(() -> resolveTargetByTags(source, lookup).orElse(null));
+
+    }
+
     public static Optional<Block> resolveTarget(Block source) {
-        var id = ForgeRegistries.BLOCKS.getKey(source);
-        if (id == null) return Optional.empty();
+        var id = BuiltInRegistries.BLOCK.getKey(source);
         String target = matchBlock(id.toString());
         if (target != null) {
-            Block b = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(target));
-            return Optional.ofNullable(b);
+            Block b = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(target));
+            return Optional.of(b);
         }
         return Optional.empty();
     }
 
-    public static Optional<Block> resolveTargetByTags(Block source) {
-        var tags = ForgeRegistries.BLOCKS.tags();
+    public static Optional<Block> resolveTargetByTags(Block source, HolderLookup.RegistryLookup<Block> registryLookup) {
+        var sourceHolder = source.builtInRegistryHolder();
+
         for (var entry : TagMapCache.entrySet()) {
-            String tagId = entry.getKey();
-            String targetId = entry.getValue();
-            var tagKey = tags.createTagKey(new ResourceLocation(tagId));
-            if (source.builtInRegistryHolder().is(tagKey)) {
-                Block target = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(targetId));
-                if (target != null) {
-                    return Optional.of(target);
-                }
-            }
+            ResourceLocation tagId = ResourceLocation.parse(entry.getKey());
+            ResourceLocation targetId = ResourceLocation.parse(entry.getValue());
+
+            TagKey<Block> tagKey = TagKey.create(Registries.BLOCK, tagId);
+
+            var tagOptional = registryLookup.get(tagKey);
+            if (tagOptional.isEmpty()) continue;
+
+            var holderSet = tagOptional.get();
+            if (!holderSet.contains(sourceHolder)) continue;
+
+            Block target = BuiltInRegistries.BLOCK.get(targetId);
+            return Optional.of(target);
         }
+
         return Optional.empty();
     }
+
 
     public static void putBlockMapping(String sourceId, String targetId) {
         if (sourceId != null && targetId != null) BlockMapCache.put(sourceId, targetId);

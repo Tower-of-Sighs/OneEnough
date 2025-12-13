@@ -37,7 +37,7 @@ public final class JsonReloadMixinHelper {
         Map<String, String> currentDataMap = snapshot.dataMap();
         Map<String, Replacements.Rules> currentDataRules = snapshot.dataRules();
 
-        if ("recipes".equals(directory) && cacheBeginReloadOverride != null) {
+        if ("recipe".equals(directory) && cacheBeginReloadOverride != null) {
             cacheBeginReloadOverride.accept(currentDataMap);
         }
 

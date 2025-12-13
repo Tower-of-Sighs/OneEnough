@@ -6,7 +6,7 @@ import com.flechazo.oneenoughfluid.client.gui.FluidSelectionScreen;
 import com.flechazo.oneenoughfluid.client.gui.FluidTagSelectionScreen;
 import com.flechazo.oneenoughfluid.client.gui.cache.GlobalFluidReplacementCache;
 import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
-import com.mafuyu404.oelib.forge.client.renderer.FluidRenderUtils;
+import com.mafuyu404.oelib.client.renderer.FluidRenderers;
 import com.mafuyu404.oneenoughitem.api.DomainAdapter;
 import com.mafuyu404.oneenoughitem.api.DomainRuntimeCache;
 import com.mafuyu404.oneenoughitem.api.ReplacementUiAdapter;
@@ -16,14 +16,17 @@ import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
 import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidUtil;
 
 import java.util.Collection;
 
@@ -54,11 +57,13 @@ public class FluidDomainAdapter implements DomainAdapter {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createObjectSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new FluidSelectionScreen(parent, isForMatch);
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createTagSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new FluidTagSelectionScreen(parent, isForMatch);
     }
@@ -110,14 +115,14 @@ public class FluidDomainAdapter implements DomainAdapter {
                 () -> FluidUtil.getFluidContained(stack).orElse(FluidStack.EMPTY)
         );
         var fluid = contained.getFluid();
-        var key = ForgeRegistries.FLUIDS.getKey(fluid);
-        return (fluid != Fluids.EMPTY && key != null) ? key.toString() : null;
+        var key = BuiltInRegistries.FLUID.getKey(fluid);
+        return fluid != Fluids.EMPTY ? key.toString() : null;
     }
 
     @Override
     public ItemStack iconForDataId(String dataId) {
         var rl = ResourceLocation.tryParse(dataId);
-        var fluid = rl != null ? ForgeRegistries.FLUIDS.getValue(rl) : null;
+        var fluid = rl != null ? BuiltInRegistries.FLUID.get(rl) : null;
         if (fluid == null || fluid == Fluids.EMPTY) return ItemStack.EMPTY;
         return ReplacementControl.withSkipReplacement(
                 () -> FluidUtil.getFilledBucket(new FluidStack(fluid, 1000))
@@ -125,27 +130,29 @@ public class FluidDomainAdapter implements DomainAdapter {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void renderDataId(GuiGraphics graphics, String dataId, int x, int y) {
         GuiUtils.drawItemBox(graphics, x, y, 18, 18);
         var rl = ResourceLocation.tryParse(dataId);
-        var fluid = rl != null ? ForgeRegistries.FLUIDS.getValue(rl) : null;
+        var fluid = rl != null ? BuiltInRegistries.FLUID.get(rl) : null;
         if (fluid == null || fluid == Fluids.EMPTY) {
             return;
         }
         ReplacementControl.withSkipReplacement(() -> {
+            long capacity = FluidType.BUCKET_VOLUME;
             FluidStack stack = new FluidStack(fluid, 1000);
-            FluidRenderUtils.renderFluid(graphics, stack, x + 1, y + 1, 16, 16);
+            FluidRenderers.render(graphics, stack, stack.getAmount(), capacity, x + 1, y + 1, 16, 16);
         });
     }
 
     @Override
     public Component displayName(String dataId) {
         var rl = ResourceLocation.tryParse(dataId);
-        var fluid = rl != null ? ForgeRegistries.FLUIDS.getValue(rl) : null;
+        var fluid = rl != null ? BuiltInRegistries.FLUID.get(rl) : null;
         if (fluid == null || fluid == Fluids.EMPTY) return Component.literal(dataId);
         return ReplacementControl.withSkipReplacement(() -> {
             FluidStack fs = new FluidStack(fluid, 1000);
-            return fs.getDisplayName();
+            return fs.getHoverName();
         });
     }
 

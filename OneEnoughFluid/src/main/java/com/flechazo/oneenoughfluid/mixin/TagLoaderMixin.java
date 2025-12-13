@@ -23,7 +23,7 @@ public abstract class TagLoaderMixin<T> {
     @Final
     private String directory;
 
-    private static final String FLUIDS_TAG_DIR = "tags/fluids";
+    private static final String FLUIDS_TAG_DIR = "tags/fluid";
 
     @Inject(method = "load(Lnet/minecraft/server/packs/resources/ResourceManager;)Ljava/util/Map;", at = @At("RETURN"))
     private void oneenoughfluid$processTags(ResourceManager resourceManager,
@@ -66,7 +66,7 @@ public abstract class TagLoaderMixin<T> {
                 var rules = currentRules.getOrDefault(fromStr, defaultRules);
                 boolean shouldReplace = rules != null && rules.tag()
                         .map(m -> m.get("fluids")).map(mode -> mode == Replacements.ProcessingMode.REPLACE)
-                        .orElse(fallbackEnabled && FluidReplacementCache.shouldReplaceInTagType(fromStr, "fluids"));
+                        .orElse(fallbackEnabled && FluidReplacementCache.shouldReplaceInTagType(fromStr, "fluid"));
 
                 if (shouldReplace) {
                     it.remove();

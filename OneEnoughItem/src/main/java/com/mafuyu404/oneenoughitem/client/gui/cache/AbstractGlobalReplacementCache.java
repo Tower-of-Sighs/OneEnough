@@ -165,7 +165,7 @@ public abstract class AbstractGlobalReplacementCache extends BaseCache {
     protected void processReplacementFile(PathUtils.FileInfo fileInfo) {
         try {
             String content = Files.readString(fileInfo.filePath());
-            if (content == null || content.trim().isEmpty()) return;
+            if (content.trim().isEmpty()) return;
             JsonElement parsed = new Gson().fromJson(content, JsonElement.class);
             if (parsed != null && parsed.isJsonArray()) {
                 JsonArray jsonArray = parsed.getAsJsonArray();

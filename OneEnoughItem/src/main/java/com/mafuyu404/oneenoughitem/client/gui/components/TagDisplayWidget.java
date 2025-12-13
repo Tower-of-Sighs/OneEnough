@@ -23,8 +23,8 @@ public class TagDisplayWidget extends AbstractWidget {
     private static final int SCROLL_DELAY = 250; // 悬停0.5秒后开始滚动（要不然有点违和）
     private long lastScrollTime = 0;
     private static final int SCROLL_INTERVAL = 60;
-    private static final ResourceLocation ITEM_BOX_TEX = new ResourceLocation(Oneenoughitem.MODID, "textures/gui/item_box.png");
-    private static final ResourceLocation CROSS_TEX = new ResourceLocation(Oneenoughitem.MODID, "textures/gui/cross.png");
+    private static final ResourceLocation ITEM_BOX_TEX = ResourceLocation.fromNamespaceAndPath(Oneenoughitem.MODID, "textures/gui/item_box.png");
+    private static final ResourceLocation CROSS_TEX = ResourceLocation.fromNamespaceAndPath(Oneenoughitem.MODID, "textures/gui/cross.png");
 
     public TagDisplayWidget(int x, int y, ResourceLocation tagId, Button.OnPress removeAction) {
         super(x, y, 70, 20, Component.empty());

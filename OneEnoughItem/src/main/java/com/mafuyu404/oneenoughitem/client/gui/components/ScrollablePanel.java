@@ -171,10 +171,10 @@ public class ScrollablePanel extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalDelta, double verticalDelta) {
         if (this.isHovered() && this.contentHeight > this.maxVisibleHeight) {
             int maxScroll = Math.max(0, this.contentHeight - this.maxVisibleHeight);
-            this.scrollOffset = (int) Math.max(0, Math.min(maxScroll, this.scrollOffset - delta * 10));
+            this.scrollOffset = (int) Math.max(0, Math.min(maxScroll, this.scrollOffset - verticalDelta * 10));
             return true;
         }
         return false;

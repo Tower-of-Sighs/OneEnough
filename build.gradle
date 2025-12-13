@@ -1,82 +1,16 @@
-allprojects {
-    repositories {
-        mavenCentral()
-        maven { url = "https://maven.neoforged.net/releases" }
-        maven {
-            name = "Jared's maven"
-            url = "https://maven.blamejared.com/"
-            content { includeGroup "mezz.jei" }
-        }
-        maven {
-            name = "Curse Maven"
-            url = "https://www.cursemaven.com"
-            content { includeGroup "curse.maven" }
-        }
-        flatDir { dir 'libs' }
-    }
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.110' apply false
 }
 
-subprojects {
-    repositories {
-        flatDir { dir 'libs' }
-        maven { url 'https://maven.aliyun.com/repository/public' }
-        maven { url 'https://maven.aliyun.com/repository/google' }
-        maven {
-            name = "Jared's maven"
-            url = "https://maven.blamejared.com/"
-            content { includeGroup "mezz.jei" }
-        }
-        maven {
-            name = "Curse Maven"
-            url = "https://www.cursemaven.com"
-            content { includeGroup "curse.maven" }
-        }
-    }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-    plugins.withId('java') {
-        java { toolchain.languageVersion = JavaLanguageVersion.of(17) }
-    }
-
-    plugins.withId('net.minecraftforge.gradle') {
-        minecraft {
-            mappings channel: rootProject.findProperty('mapping_channel'),
-                    version: rootProject.findProperty('mapping_version')
-            copyIdeResources = true
-        }
-
-        dependencies {
-            minecraft "net.minecraftforge:forge:${rootProject.findProperty('minecraft_version')}-${rootProject.findProperty('forge_version')}"
-
-            compileOnly fg.deobf("libs:oelib-forge:0.0.5")
-            runtimeOnly fg.deobf("libs:oelib-forge:0.0.5")
-            implementation fg.deobf("libs:oelib-forge:0.0.5")
-            implementation fg.deobf("curse.maven:kubejs-238086:5853326")
-            implementation fg.deobf("curse.maven:rhino-416294:6186971")
-            implementation fg.deobf("curse.maven:architectury-api-419699:5137938")
-            implementation fg.deobf("curse.maven:jupiter-1072905:6843043")
-            compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.20.0.104")
-            implementation fg.deobf("mezz.jei:jei-1.20.1-forge:15.20.0.104")
-            runtimeOnly fg.deobf("curse.maven:sakura-333079:6955704")
-            runtimeOnly fg.deobf("curse.maven:mysterious-mountain-lib-368098:7039998")
-        }
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
     }
 }
-
-configure(project(":OneEnoughBlock")) {
-    plugins.withId('net.minecraftforge.gradle') {
-        dependencies {
-            implementation project(":OneEnoughItem")
-        }
-    }
-}
-configure(project(":OneEnoughFluid")) {
-    plugins.withId('net.minecraftforge.gradle') {
-        dependencies {
-            implementation project(":OneEnoughBlock")
-            implementation project(":OneEnoughItem")
-        }
-    }
-}
-
-tasks.register('buildAll') { dependsOn subprojects.collect { it.tasks.named('build') } }
-tasks.register('cleanAll') { dependsOn subprojects.collect { it.tasks.named('clean') } }

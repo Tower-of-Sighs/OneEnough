@@ -34,7 +34,7 @@ public abstract class SimpleJsonResourceReloadListenerMixin {
                 resourceManager,
                 cir.getReturnValue(),
                 new OEIReplacementStrategy(),
-                "recipes".equals(this.directory) ? ItemReplacementCache::beginReloadOverride : null,
+                "recipe".equals(this.directory) ? ItemReplacementCache::beginReloadOverride : null,
                 ItemReplacementCache::hasAnyMappings,
                 modId -> {
                     var cfg = OEIConfig.getDefaultRules(modId);

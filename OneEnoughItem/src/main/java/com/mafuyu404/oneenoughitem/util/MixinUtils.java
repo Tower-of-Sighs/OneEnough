@@ -312,9 +312,9 @@ public class MixinUtils {
 
     public static FieldRule getDataDirFieldRule(String directory) {
         return switch (directory) {
-            case "recipes" -> new FieldRule(Set.of("item", "id", "result"), true);
-            case "advancements" -> new FieldRule(Set.of("item"), true);
-            case "loot_tables" -> new FieldRule(Set.of("name"), true);
+            case "recipe" -> new FieldRule(Set.of("item", "id", "result"), true);
+            case "advancement" -> new FieldRule(Set.of("item"), true);
+            case "loot_table" -> new FieldRule(Set.of("name"), true);
             default -> new FieldRule(Set.of("item", "id", "result"), false);
         };
     }

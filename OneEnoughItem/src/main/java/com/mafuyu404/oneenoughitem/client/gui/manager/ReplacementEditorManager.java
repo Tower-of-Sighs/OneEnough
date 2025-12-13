@@ -150,7 +150,7 @@ public class ReplacementEditorManager {
                 // 处理匹配项
                 for (String matchItem : replacement.match()) {
                     if (matchItem.startsWith("#")) {
-                        this.matchTags.add(new ResourceLocation(matchItem.substring(1)));
+                        this.matchTags.add(ResourceLocation.parse(matchItem.substring(1)));
                     } else {
                         this.matchDataIds.add(matchItem);
                     }
@@ -159,7 +159,7 @@ public class ReplacementEditorManager {
                 // 处理结果项
                 String resultString = replacement.result();
                 if (resultString.startsWith("#")) {
-                    this.resultTag = new ResourceLocation(resultString.substring(1));
+                    this.resultTag = ResourceLocation.parse(resultString.substring(1));
                 } else {
                     this.resultDataId = resultString;
                 }

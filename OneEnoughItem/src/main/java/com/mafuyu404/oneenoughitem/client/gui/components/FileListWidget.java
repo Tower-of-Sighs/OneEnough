@@ -19,9 +19,7 @@ public class FileListWidget extends ObjectSelectionList<FileListWidget.FileEntry
     private final List<Button> actionButtons = new ArrayList<>();
 
     public FileListWidget(Minecraft minecraft, int width, int height, int y, int itemHeight, BiConsumer<Path, Integer> onFileSelect) {
-        super(minecraft, width, height, y, y + height, itemHeight);
-        this.setRenderBackground(false);
-        this.setRenderTopAndBottom(false);
+        super(minecraft, width, height, y, itemHeight);
         this.onFileSelect = onFileSelect;
     }
 
@@ -92,12 +90,18 @@ public class FileListWidget extends ObjectSelectionList<FileListWidget.FileEntry
         this.actionButtons.add(deleteButton);
     }
 
+
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderWidget(graphics, mouseX, mouseY, partialTick);
+
         for (Button button : this.actionButtons) {
             button.render(graphics, mouseX, mouseY, partialTick);
         }
+    }
+
+    @Override
+    protected void renderListBackground(GuiGraphics guiGraphics) {
     }
 
     @Override
@@ -121,7 +125,6 @@ public class FileListWidget extends ObjectSelectionList<FileListWidget.FileEntry
         @Override
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight,
                            int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
-
             boolean isSelected = FileListWidget.this.selectedEntry == this;
 
             GuiUtils.drawFileEntryBackground(graphics, x, y, entryWidth, entryHeight, isMouseOver, isSelected);

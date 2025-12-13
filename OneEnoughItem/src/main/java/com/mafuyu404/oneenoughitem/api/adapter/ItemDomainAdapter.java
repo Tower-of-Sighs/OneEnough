@@ -17,11 +17,13 @@ import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Collection;
 
@@ -52,11 +54,13 @@ public class ItemDomainAdapter implements DomainAdapter {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createObjectSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new ItemSelectionScreen(parent, isForMatch);
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createTagSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new ItemTagSelectionScreen(parent, isForMatch);
     }
@@ -109,11 +113,12 @@ public class ItemDomainAdapter implements DomainAdapter {
     @Override
     public ItemStack iconForDataId(String dataId) {
         var rl = ResourceLocation.tryParse(dataId);
-        var item = rl != null ? ForgeRegistries.ITEMS.getValue(rl) : null;
+        var item = rl != null ? BuiltInRegistries.ITEM.get(rl) : null;
         return item != null ? ReplacementControl.withSkipReplacement(() -> new ItemStack(item)) : ItemStack.EMPTY;
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void renderDataId(GuiGraphics graphics, String dataId, int x, int y) {
         var stack = iconForDataId(dataId);
         GuiUtils.drawItemBox(graphics, x, y, 18, 18);
@@ -126,10 +131,7 @@ public class ItemDomainAdapter implements DomainAdapter {
         if (dataId == null || dataId.isEmpty()) {
             return Component.literal("");
         }
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(dataId));
-        if (item == null) {
-            return Component.literal(dataId);
-        }
+        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(dataId));
         ItemStack stack = new ItemStack(item);
         return stack.getHoverName();
     }

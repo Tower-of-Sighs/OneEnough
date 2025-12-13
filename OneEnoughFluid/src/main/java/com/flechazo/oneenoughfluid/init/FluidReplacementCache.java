@@ -3,11 +3,10 @@ package com.flechazo.oneenoughfluid.init;
 import com.flechazo.oneenoughfluid.Oneenoughfluid;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITag;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -144,23 +143,6 @@ public final class FluidReplacementCache {
             if (resultFluid.equals(id)) result.add(matchFluid);
         });
         return result;
-    }
-
-    private static List<Fluid> resolve(List<String> ids) {
-        List<Fluid> out = new ArrayList<>();
-        for (String id : ids) {
-            if (id == null || id.isEmpty()) continue;
-
-            if (id.startsWith("#")) {
-                ResourceLocation tagId = new ResourceLocation(id.substring(1));
-                ITag<Fluid> tag = ForgeRegistries.FLUIDS.tags().getTag(TagKey.create(ForgeRegistries.FLUIDS.getRegistryKey(), tagId));
-                out.addAll(tag.stream().toList());
-            } else {
-                Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(id));
-                if (fluid != null) out.add(fluid);
-            }
-        }
-        return out;
     }
 
     private static Optional<Replacements.Rules> getGlobalDefaultRules() {

@@ -6,11 +6,11 @@ import com.mafuyu404.oneenoughitem.api.ReplacementUiAdapter;
 import com.mafuyu404.oneenoughitem.client.gui.cache.AbstractGlobalReplacementCache;
 import com.mafuyu404.oneenoughitem.client.gui.util.UiTooltipRenderHelper;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.List;
 
@@ -29,9 +29,9 @@ public class FluidReplacementUiAdapter implements ReplacementUiAdapter {
                 tooltip, dataId, runtime, global, Oneenoughfluid.MODID, "fluid",
                 rep -> {
                     var rl = ResourceLocation.tryParse(rep);
-                    var fluid = rl != null ? ForgeRegistries.FLUIDS.getValue(rl) : null;
+                    var fluid = rl != null ? BuiltInRegistries.FLUID.get(rl) : null;
                     if (fluid != null && fluid != Fluids.EMPTY) {
-                        return new FluidStack(fluid, 1000).getDisplayName().getString();
+                        return new FluidStack(fluid, 1000).getHoverName().getString();
                     }
                     return rep;
                 }
@@ -44,9 +44,9 @@ public class FluidReplacementUiAdapter implements ReplacementUiAdapter {
                 tooltip, tagId, runtime, global, Oneenoughfluid.MODID, "fluid",
                 rep -> {
                     var rl = ResourceLocation.tryParse(rep);
-                    var fluid = rl != null ? ForgeRegistries.FLUIDS.getValue(rl) : null;
+                    var fluid = rl != null ? BuiltInRegistries.FLUID.get(rl) : null;
                     if (fluid != null && fluid != Fluids.EMPTY) {
-                        return new FluidStack(fluid, 1000).getDisplayName().getString();
+                        return new FluidStack(fluid, 1000).getHoverName().getString();
                     }
                     return rep;
                 }

@@ -6,12 +6,12 @@ import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
 import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,15 +35,20 @@ public class BlockSelectionScreen extends BaseObjectSelectionScreen<Block> {
 
     @Override
     protected List<Block> loadAllObjects() {
-        return ForgeRegistries.BLOCKS.getValues().stream()
+        return BuiltInRegistries.BLOCK.stream()
                 .filter(b -> b.asItem() != Items.AIR)
                 .collect(Collectors.toList());
     }
 
     @Override
     protected String getId(Block obj) {
-        var key = ForgeRegistries.BLOCKS.getKey(obj);
-        return key != null ? key.toString() : null;
+        var key = BuiltInRegistries.BLOCK.getKey(obj);
+        return key.toString();
+    }
+
+    @Override
+    protected String getName(Block obj) {
+        return obj.getName().getString();
     }
 
     @Override
@@ -58,8 +63,8 @@ public class BlockSelectionScreen extends BaseObjectSelectionScreen<Block> {
     protected void onSelectSingle(String id) {
         var key = ResourceLocation.tryParse(id);
         if (key == null) return;
-        Block block = ForgeRegistries.BLOCKS.getValue(key);
-        if (block == null || block.asItem() == Items.AIR) return;
+        Block block = BuiltInRegistries.BLOCK.get(key);
+        if (block.asItem() == Items.AIR) return;
         if (this.isForMatch) this.parent.addMatchItem(block.asItem());
         else this.parent.setResultItem(block.asItem());
     }
@@ -68,8 +73,8 @@ public class BlockSelectionScreen extends BaseObjectSelectionScreen<Block> {
     protected boolean isSelectable(String id, boolean forMatch) {
         var key = ResourceLocation.tryParse(id);
         if (key == null) return false;
-        Block block = ForgeRegistries.BLOCKS.getValue(key);
-        return block != null && block.asItem() != Items.AIR;
+        Block block = BuiltInRegistries.BLOCK.get(key);
+        return block.asItem() != Items.AIR;
     }
 
     @Override
@@ -77,8 +82,8 @@ public class BlockSelectionScreen extends BaseObjectSelectionScreen<Block> {
         return switch (mode) {
             case NAME -> Comparator.comparing(b -> new ItemStack(b.asItem()).getHoverName().getString());
             case MOD ->
-                    Comparator.comparing(b -> Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(b)).getNamespace());
-            case ID -> Comparator.comparing(b -> Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(b)).toString());
+                    Comparator.comparing(b -> Objects.requireNonNull(BuiltInRegistries.BLOCK.getKey(b)).getNamespace());
+            case ID -> Comparator.comparing(b -> Objects.requireNonNull(BuiltInRegistries.BLOCK.getKey(b)).toString());
         };
     }
 

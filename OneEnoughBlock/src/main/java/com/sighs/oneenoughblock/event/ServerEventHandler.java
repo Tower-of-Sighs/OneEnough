@@ -1,59 +1,65 @@
 package com.sighs.oneenoughblock.event;
 
-import com.mafuyu404.oelib.forge.data.DataManager;
-import com.mafuyu404.oelib.forge.event.DataReloadEvent;
+import com.mafuyu404.oelib.neoforge.data.DataManager;
+import com.mafuyu404.oelib.neoforge.event.DataReloadEvent;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.sighs.oneenoughblock.init.BlockReplacementCache;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(modid = "oneenoughblock")
+@EventBusSubscriber(modid = "oneenoughblock")
 public class ServerEventHandler {
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        HANDLER.rebuildReplacementCache("oeb-server-start", DataManager.get(Replacements.class));
+        var server = event.getServer();
+        var registryLookup = server.registryAccess().lookupOrThrow(Registries.BLOCK);
+        HANDLER.rebuildReplacementCache("oeb-server-start", DataManager.get(Replacements.class), registryLookup);
     }
 
     @SubscribeEvent
     public static void onDataReload(DataReloadEvent event) {
         if (event.isDataType(Replacements.class)) {
-            HANDLER.rebuildReplacementCache("oeb-server-data-reload", DataManager.get(Replacements.class));
+            var server = DataManager.getCurrentServer();
+            var registryLookup = server != null ? server.registryAccess().lookupOrThrow(Registries.BLOCK) : null;
+            HANDLER.rebuildReplacementCache("oeb-server-data-reload", DataManager.get(Replacements.class), registryLookup);
         }
     }
 
     private static final Handler HANDLER = new Handler();
 
-    private static class Handler extends AbstractReplacementEventHandler {
+    private static class Handler extends AbstractReplacementEventHandler<Block> {
         @Override
         protected void clearModuleCache() {
             BlockReplacementCache.clearCache();
         }
 
         @Override
-        protected void putToModuleCache(Replacements r) {
+        protected void putToModuleCache(Replacements r, HolderLookup.RegistryLookup<Block> registryLookup) {
             BlockReplacementCache.putReplacement(buildReplacements(r));
         }
 
         @Override
-        protected boolean tryResolveData(String id) {
-            return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id)) != null;
+        protected boolean tryResolveData(String id, HolderLookup.RegistryLookup<Block> registryLookup) {
+            BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id));
+            return true;
         }
 
         @Override
-        protected boolean tryResolveTag(String tagId) {
-            TagKey<Block> tag = TagKey.create(Registries.BLOCK, new ResourceLocation(tagId));
-            for (Block b : ForgeRegistries.BLOCKS) {
+        protected boolean tryResolveTag(String tagId, HolderLookup.RegistryLookup<Block> registryLookup) {
+            TagKey<Block> tag = TagKey.create(Registries.BLOCK, ResourceLocation.parse(tagId));
+            for (Block b : BuiltInRegistries.BLOCK) {
                 if (b.builtInRegistryHolder().is(tag)) return true;
             }
             return false;

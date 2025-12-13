@@ -23,7 +23,7 @@ public abstract class DomainConfig extends AutoInitConfigContainer {
 
     protected DomainConfig(String domainId, String configFileName, DefaultRules defaultRules) {
         super(
-                new ResourceLocation(Oneenoughitem.MODID, domainId + "_common_config"),
+                ResourceLocation.fromNamespaceAndPath(Oneenoughitem.MODID, domainId + "_common_config"),
                 "config." + domainId + ".common.title",
                 "./config/" + domainId + "/" + configFileName
         );

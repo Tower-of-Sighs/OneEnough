@@ -12,7 +12,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,11 +68,6 @@ public class ItemGridWidget extends AbstractWidget {
                 this.hoveredIndex = i;
             }
         }
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
 
         if (this.hoveredIndex >= 0 && this.hoveredIndex < this.items.size()) {
             ItemStack hoveredStack = this.items.get(this.hoveredIndex);

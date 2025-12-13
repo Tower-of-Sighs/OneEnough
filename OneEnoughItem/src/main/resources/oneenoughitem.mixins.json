@@ -6,7 +6,7 @@
   "refmap": "oneenoughitem.refmap.json",
   "mixins": [
     "CreativeModeTabMixin",
-    "ItemMixin",
+    "ItemStackAccessor",
     "ItemStackMixin",
     "SimpleJsonResourceReloadListenerMixin",
     "TagLoaderMixin"

@@ -7,9 +7,12 @@ import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -19,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
 @Mixin(value = ItemStack.class)
@@ -27,22 +29,28 @@ public abstract class ItemStackMixin {
     @Mutable
     @Shadow
     @Final
-    @Deprecated
     @Nullable
     private Item item;
 
     @Mutable
-    @Shadow
+    @Shadow(remap = false)
     @Final
-    @org.jetbrains.annotations.Nullable
-    private Holder.Reference<Item> delegate;
+    PatchedDataComponentMap components;
 
     @Shadow
     public abstract Item getItem();
 
-    @Inject(method = "forgeInit", at = @At("HEAD"), remap = false)
-    private void replace(CallbackInfo ci) {
-        if (item == null) {
+    @Inject(method = "<init>(Lnet/minecraft/world/level/ItemLike;ILnet/minecraft/core/component/PatchedDataComponentMap;)V", at = @At("TAIL"))
+    private void replaceWithComponents(ItemLike itemLike, int count, PatchedDataComponentMap components, CallbackInfo ci) {
+        performReplacement();
+    }
+
+    private void performReplacement() {
+        if (this.item == null) {
+            return;
+        }
+
+        if (isInCreativeModeTabBuilding()) {
             return;
         }
 
@@ -51,27 +59,24 @@ public abstract class ItemStackMixin {
             return;
         }
 
-        try {
-            String originItemId = Utils.getItemRegistryName(item);
-            if (originItemId == null) {
-                return;
-            }
+        String originItemId = Utils.getItemRegistryName(this.item);
+        String targetItemId = ItemReplacementCache.matchItem(originItemId);
 
-            String targetItemId = ItemReplacementCache.matchItem(originItemId);
-            if (targetItemId != null) {
-                if (targetItemId.equals("minecraft:air") && isInCreativeModeTabBuilding()) return;
-                Item replacementItem = Utils.getItemById(targetItemId);
-                if (replacementItem != null) {
-                    item = replacementItem;
-                    delegate = ForgeRegistries.ITEMS.getDelegateOrThrow(replacementItem);
-                } else {
-                    Oneenoughitem.LOGGER.warn("ItemStackMixin: Replacement item is null for targetItemId: {}, original item: {}",
-                            targetItemId, originItemId);
-                }
+        if (targetItemId != null) {
+            Item newItem = Utils.getItemById(targetItemId);
+            if (newItem != null) {
+                DataComponentPatch currentPatch = this.components.asPatch();
+
+                this.item = newItem;
+
+                this.components = PatchedDataComponentMap.fromPatch(newItem.components(), currentPatch);
+
+                newItem.verifyComponentsAfterLoad((ItemStack) (Object) this);
+
+                Oneenoughitem.LOGGER.debug("Successfully replaced item {} with {}", originItemId, targetItemId);
+            } else {
+                Oneenoughitem.LOGGER.warn("Target item not found: {}", targetItemId);
             }
-        } catch (Exception e) {
-            String itemInfo = item != null ? Utils.getItemRegistryName(item) : "null";
-            Oneenoughitem.LOGGER.error("ItemStackMixin: Failed to replace item: {}", itemInfo, e);
         }
     }
 

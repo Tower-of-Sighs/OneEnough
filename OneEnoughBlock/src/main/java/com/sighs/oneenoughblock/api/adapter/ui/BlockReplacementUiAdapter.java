@@ -6,10 +6,10 @@ import com.mafuyu404.oneenoughitem.client.gui.cache.AbstractGlobalReplacementCac
 import com.mafuyu404.oneenoughitem.client.gui.util.UiTooltipRenderHelper;
 import com.sighs.oneenoughblock.Oneenoughblock;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class BlockReplacementUiAdapter implements ReplacementUiAdapter {
                 tooltip, dataId, runtime, global, Oneenoughblock.MODID, "block",
                 rep -> {
                     var rl = ResourceLocation.tryParse(rep);
-                    var block = rl != null ? ForgeRegistries.BLOCKS.getValue(rl) : null;
+                    var block = rl != null ? BuiltInRegistries.BLOCK.get(rl) : null;
                     return block != null ? new ItemStack(block.asItem()).getHoverName().getString() : rep;
                 }
         );
@@ -40,7 +40,7 @@ public class BlockReplacementUiAdapter implements ReplacementUiAdapter {
                 tooltip, tagId, runtime, global, Oneenoughblock.MODID, "block",
                 rep -> {
                     var rl = ResourceLocation.tryParse(rep);
-                    var block = rl != null ? ForgeRegistries.BLOCKS.getValue(rl) : null;
+                    var block = rl != null ? BuiltInRegistries.BLOCK.get(rl) : null;
                     return block != null ? new ItemStack(block.asItem()).getHoverName().getString() : rep;
                 }
         );

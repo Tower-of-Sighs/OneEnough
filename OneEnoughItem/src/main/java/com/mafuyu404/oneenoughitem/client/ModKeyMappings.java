@@ -2,13 +2,13 @@ package com.mafuyu404.oneenoughitem.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(modid = "oneenoughitem", value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = "oneenoughitem", value = Dist.CLIENT)
 public class ModKeyMappings {
     public static final String CATEGORY = "key.categories.oneenoughitem";
     public static KeyMapping OPEN_EDITOR = new KeyMapping(
@@ -23,3 +23,4 @@ public class ModKeyMappings {
         event.register(ModKeyMappings.OPEN_EDITOR);
     }
 }
+

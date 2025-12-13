@@ -48,9 +48,8 @@ public class PalettedContainerMixin implements IPalettedContainer {
     }
 
     private Optional<BlockState> resolveReplacement(BlockState state) {
-        Block b = state.getBlock();
-        return BlockReplacementCache.resolveTarget(b)
-                .or(() -> BlockReplacementCache.resolveTargetByTags(b))
+        return BlockReplacementCache
+                .resolveTarget(state.getBlock(), null)
                 .map(Block::defaultBlockState)
                 .filter(rs -> !state.is(rs.getBlock()));
     }

@@ -1,93 +1,84 @@
 package com.mafuyu404.oneenoughitem.util;
 
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITagManager;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 public class Utils {
     public static String getItemRegistryName(Item item) {
-        if (item == null) {
-            return null;
-        }
-
-        ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(item);
-        if (registryName == null) {
-            Oneenoughitem.LOGGER.warn("getItemRegistryName: registryName is null for item: {}", item.getClass().getName());
-            return null;
-        }
-
+        if (item == null) return null;
+        ResourceLocation registryName = BuiltInRegistries.ITEM.getKey(item);
         return registryName.toString();
     }
 
     public static Item getItemById(String registryName) {
-        if (registryName == null || registryName.isEmpty()) {
-            Oneenoughitem.LOGGER.debug("getItemById: registryName is null or empty");
-            return null;
-        }
+        if (registryName == null || registryName.isEmpty()) return null;
 
         try {
-            ResourceLocation resourceLocation = new ResourceLocation(registryName);
-
-            if (!ForgeRegistries.ITEMS.containsKey(resourceLocation)) {
-                Oneenoughitem.LOGGER.debug("getItemById: Item '{}' not found in registry", registryName);
-                return null;
-            }
-
-            Item item = ForgeRegistries.ITEMS.getValue(resourceLocation);
-
-//            if (item == null || item == Items.AIR) {
-//                Oneenoughitem.LOGGER.debug("getItemById: Item '{}' is null or AIR", registryName);
-//                return null;
-//            }
-            return item;
+            ResourceLocation resourceLocation = ResourceLocation.parse(registryName);
+            if (!BuiltInRegistries.ITEM.containsKey(resourceLocation)) return null;
+            return BuiltInRegistries.ITEM.get(resourceLocation);
         } catch (Exception e) {
-            Oneenoughitem.LOGGER.debug("getItemById: Exception while getting item for registry name: {}", registryName, e);
+            Oneenoughitem.LOGGER.debug("getItemById: Exception for {}", registryName, e);
             return null;
         }
     }
 
-    public static Collection<Item> getItemsOfTag(ResourceLocation tagId) {
-        TagKey<Item> tagKey = ForgeRegistries.ITEMS.tags().createTagKey(tagId);
-        ITagManager<Item> tagManager = ForgeRegistries.ITEMS.tags();
+    public static Collection<Item> getItemsOfTag(ResourceLocation tagId, HolderLookup.RegistryLookup<Item> registryLookup) {
+        TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagId);
         Collection<Item> result = new HashSet<>();
 
-        if (tagManager != null && tagManager.isKnownTagName(tagKey)) {
-            tagManager.getTag(tagKey).forEach(result::add);
+        Oneenoughitem.LOGGER.debug("Attempting to resolve tag: {}", tagId);
+
+        var tagOptional = registryLookup.get(tagKey);
+        if (tagOptional.isPresent()) {
+            var holderSet = tagOptional.get();
+            for (var holder : holderSet) {
+                result.add(holder.value());
+            }
+            Oneenoughitem.LOGGER.debug("Tag {} resolved to {} items: {}",
+                    tagId, result.size(),
+                    result.stream().map(Utils::getItemRegistryName).toList());
+        } else {
+            Oneenoughitem.LOGGER.warn("Tag {} not found in registry lookup", tagId);
         }
+
         return result;
     }
 
-    public static boolean isTagExists(ResourceLocation tagId) {
-        TagKey<Item> tagKey = ForgeRegistries.ITEMS.tags().createTagKey(tagId);
-        ITagManager<Item> tagManager = ForgeRegistries.ITEMS.tags();
-        return tagManager != null && tagManager.isKnownTagName(tagKey);
+    public static boolean isTagExists(ResourceLocation tagId, HolderLookup.RegistryLookup<Item> registryLookup) {
+        TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagId);
+        return registryLookup.get(tagKey).isPresent();
     }
 
-    public static List<Item> resolveItemList(List<String> identifiers) {
+
+    public static List<Item> resolveItemList(List<String> identifiers, HolderLookup.RegistryLookup<Item> registryLookup) {
         List<Item> result = new ArrayList<>();
 
         for (String id : identifiers) {
             if (id == null || id.isEmpty()) continue;
 
             if (id.startsWith("#")) {
-                String tagIdString = id.substring(1);
-                try {
-                    ResourceLocation tagId = new ResourceLocation(tagIdString);
-                    Collection<Item> tagItems = getItemsOfTag(tagId);
-                    if (tagItems.isEmpty()) {
-                        Oneenoughitem.LOGGER.warn("Tag {} is empty or not found", tagId);
-                    } else {
-                        result.addAll(tagItems);
-                        Oneenoughitem.LOGGER.debug("Resolved tag {} to {} items", tagId, tagItems.size());
-                    }
-                } catch (Exception e) {
-                    Oneenoughitem.LOGGER.error("Invalid tag ID format: {}", id, e);
+                ResourceLocation tagId = ResourceLocation.tryParse(id.substring(1));
+                if (tagId == null) {
+                    Oneenoughitem.LOGGER.warn("Invalid tag ID format: {}", id);
+                    continue;
+                }
+
+                Collection<Item> tagItems = getItemsOfTag(tagId, registryLookup);
+                if (tagItems.isEmpty()) {
+                    Oneenoughitem.LOGGER.warn("Tag {} is empty or not found", tagId);
+                } else {
+                    result.addAll(tagItems);
                 }
             } else {
                 Item item = getItemById(id);
@@ -102,23 +93,7 @@ public class Utils {
         return result;
     }
 
-    public static List<ResourceLocation> getItemTags(Item item) {
-        ITagManager<Item> tagManager = ForgeRegistries.ITEMS.tags();
-
-        if (tagManager == null) {
-            return Collections.emptyList();
-        }
-
-        return tagManager.getReverseTag(item)
-                .map(reverseTag ->
-                        reverseTag.getTagKeys()
-                                .map(TagKey::location)
-                                .collect(Collectors.toList()))
-                .orElse(Collections.emptyList());
-    }
-
     public static boolean isItemIdEmpty(String id) {
         return id == null || id.equals("minecraft:air");
     }
-
 }

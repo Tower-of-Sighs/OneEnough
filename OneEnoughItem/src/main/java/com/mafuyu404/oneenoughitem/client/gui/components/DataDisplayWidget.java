@@ -13,7 +13,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class DataDisplayWidget extends AbstractWidget {
     private final Button.OnPress removeAction;
     private final boolean skipReplacement;
     private static final ResourceLocation CROSS_TEX =
-            new ResourceLocation(Oneenoughitem.MODID, "textures/gui/cross.png");
+            ResourceLocation.fromNamespaceAndPath(Oneenoughitem.MODID, "textures/gui/cross.png");
 
     public DataDisplayWidget(int x, int y, String dataId, Button.OnPress removeAction, boolean skipReplacement) {
         super(x, y, 18, 18, Component.empty());
@@ -51,11 +51,6 @@ public class DataDisplayWidget extends AbstractWidget {
             int crossY = this.getY() + 1;
             graphics.blit(CROSS_TEX, crossX, crossY, 0, 0, 8, 8, 8, 8);
         }
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
 
         if (this.isHovered() && !this.dataId.isEmpty()) {
             renderTooltip(graphics, mouseX, mouseY);

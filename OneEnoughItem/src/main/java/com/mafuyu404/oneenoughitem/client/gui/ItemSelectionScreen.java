@@ -7,12 +7,12 @@ import com.mafuyu404.oneenoughitem.util.ReplacementControl;
 import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,12 +35,17 @@ public class ItemSelectionScreen extends BaseObjectSelectionScreen<Item> {
 
     @Override
     protected List<Item> loadAllObjects() {
-        return ForgeRegistries.ITEMS.getValues().stream().filter(item -> item != Items.AIR).collect(Collectors.toList());
+        return BuiltInRegistries.ITEM.stream().filter(item -> item != Items.AIR).collect(Collectors.toList());
     }
 
     @Override
     protected String getId(Item obj) {
         return Utils.getItemRegistryName(obj);
+    }
+
+    @Override
+    protected String getName(Item obj) {
+        return obj.getDescription().getString();
     }
 
     @Override
@@ -55,8 +60,8 @@ public class ItemSelectionScreen extends BaseObjectSelectionScreen<Item> {
     protected void onSelectSingle(String id) {
         var rl = ResourceLocation.tryParse(id);
         if (rl == null) return;
-        Item item = ForgeRegistries.ITEMS.getValue(rl);
-        if (item == null || item == Items.AIR) return;
+        Item item = BuiltInRegistries.ITEM.get(rl);
+        if (item == Items.AIR) return;
         if (this.isForMatch) this.parent.addMatchItem(item);
         else this.parent.setResultItem(item);
     }
@@ -83,9 +88,9 @@ public class ItemSelectionScreen extends BaseObjectSelectionScreen<Item> {
                 return stack.getHoverName().getString();
             });
             case MOD ->
-                    Comparator.comparing(item -> Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(item)).getNamespace());
+                    Comparator.comparing(item -> Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item)).getNamespace());
             case ID ->
-                    Comparator.comparing(item -> Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(item)).toString());
+                    Comparator.comparing(item -> Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item)).toString());
         };
     }
 

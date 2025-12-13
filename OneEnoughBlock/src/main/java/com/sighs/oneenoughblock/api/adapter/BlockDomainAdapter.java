@@ -16,12 +16,14 @@ import com.sighs.oneenoughblock.init.BlockReplacementCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Collection;
 
@@ -52,11 +54,13 @@ public class BlockDomainAdapter implements DomainAdapter {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createObjectSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new BlockSelectionScreen(parent, isForMatch);
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public Screen createTagSelectionScreen(ReplacementEditorScreen parent, boolean isForMatch) {
         return new BlockTagSelectionScreen(parent, isForMatch);
     }
@@ -104,8 +108,8 @@ public class BlockDomainAdapter implements DomainAdapter {
     @Override
     public String dataIdFromItem(Item item) {
         if (item instanceof BlockItem bi) {
-            var key = ForgeRegistries.BLOCKS.getKey(bi.getBlock());
-            return key != null ? key.toString() : null;
+            var key = BuiltInRegistries.BLOCK.getKey(bi.getBlock());
+            return key.toString();
         }
         return null;
     }
@@ -113,12 +117,13 @@ public class BlockDomainAdapter implements DomainAdapter {
     @Override
     public ItemStack iconForDataId(String dataId) {
         var rl = ResourceLocation.tryParse(dataId);
-        var block = rl != null ? ForgeRegistries.BLOCKS.getValue(rl) : null;
+        var block = rl != null ? BuiltInRegistries.BLOCK.get(rl) : null;
         if (block == null) return ItemStack.EMPTY;
         return ReplacementControl.withSkipReplacement(() -> new ItemStack(block.asItem()));
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void renderDataId(GuiGraphics graphics, String dataId, int x, int y) {
         var stack = iconForDataId(dataId);
         GuiUtils.drawItemBox(graphics, x, y, 18, 18);
@@ -129,7 +134,7 @@ public class BlockDomainAdapter implements DomainAdapter {
     @Override
     public Component displayName(String dataId) {
         var rl = ResourceLocation.tryParse(dataId);
-        var block = rl != null ? ForgeRegistries.BLOCKS.getValue(rl) : null;
+        var block = rl != null ? BuiltInRegistries.BLOCK.get(rl) : null;
         if (block == null) return Component.literal(dataId);
         var stack = new ItemStack(block.asItem());
         return stack.getHoverName();

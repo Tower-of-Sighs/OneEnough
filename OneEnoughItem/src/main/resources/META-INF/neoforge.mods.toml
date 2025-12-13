@@ -1,0 +1,43 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+#issueTrackerURL = ""
+license = "GPL-3.0 license"
+
+[[mods]]
+modId = "oneenoughitem"
+version = "1.0.6"
+displayName = "oneenoughitem"
+authors = "Flechazo, SnowMerry, zhenshiz, _yi_ran_"
+description = "Mafuyu never like you."
+logoFile = "assets/oneenoughitem/web/img/img.png" #optional
+
+[[dependencies.oneenoughitem]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.194,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.oneenoughitem]]
+modId = "oelib"
+type = "required"
+versionRange = "[0.0.6,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.oneenoughitem]]
+modId = "jupiter"
+type = "required"
+versionRange = "[2.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.oneenoughitem]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21,1.21.2)"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "oneenoughitem.mixins.json"
