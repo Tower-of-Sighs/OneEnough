@@ -5,7 +5,7 @@ license = "GPL-3.0 license"
 
 [[mods]]
 modId = "oneenoughitem"
-version = "1.0.6"
+version = "1.0.7"
 displayName = "oneenoughitem"
 authors = "Flechazo, SnowMerry, zhenshiz, _yi_ran_"
 description = "Mafuyu never like you."
