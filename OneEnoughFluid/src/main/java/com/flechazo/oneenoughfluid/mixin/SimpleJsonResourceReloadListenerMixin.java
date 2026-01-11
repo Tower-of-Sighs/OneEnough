@@ -37,8 +37,8 @@ public abstract class SimpleJsonResourceReloadListenerMixin {
                 "recipe".equals(this.directory) ? FluidReplacementCache::beginReloadOverride : null,
                 FluidReplacementCache::hasAnyMappings,
                 modId -> {
-                    var cfg = OEFConfig.getDefaultRules(modId);
-                    return cfg != null ? cfg.toRules() : null;
+                    var cfg = OEFConfig.get();
+                    return cfg != null ? cfg.defaultRules().toRules() : null;
                 },
                 "oef"
         );

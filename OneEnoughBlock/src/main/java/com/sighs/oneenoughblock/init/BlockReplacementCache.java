@@ -190,9 +190,9 @@ public class BlockReplacementCache {
 
     public static Optional<Replacements.Rules> getGlobalDefaultRules() {
         try {
-            var cfg = OEIConfig.getDefaultRules("oeb");
+            var cfg = OEBConfig.get();
             if (cfg != null) {
-                return Optional.of(cfg.toRules());
+                return Optional.of(cfg.defaultRules().toRules());
             }
         } catch (Exception ignored) {
         }

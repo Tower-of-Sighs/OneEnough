@@ -8,5 +8,11 @@
   "tooltip.oneenoughfluid.replaced_with_fluid": "Replaced with fluid: %s",
   "tooltip.oneenoughfluid.source_runtime": "(From runtime rules)",
   "tooltip.oneenoughfluid.source_saved": "(From saved rules)",
-  "tooltip.oneenoughfluid.item_used_as_result": "This fluid is used as a result"
+  "tooltip.oneenoughfluid.item_used_as_result": "This fluid is used as a result",
+  "config.oef.common_config.Default_Rules_data": "Default Rules (data directories)",
+  "config.oef.common_config.Default_Rules_data.tooltip": "Map from directory to processing mode (replace/retain)",
+  "config.oef.common_config.Default_Rules_tag": "Default Rules (tags)",
+  "config.oef.common_config.Default_Rules_tag.tooltip": "Map from tag domain to processing mode (replace/retain)",
+  "config.oef.common_config.title": "Common",
+  "config.oef.title": "OneEnoughFluid Config"
 }

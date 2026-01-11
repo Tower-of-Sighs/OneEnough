@@ -1,6 +1,6 @@
 package com.mafuyu404.oneenoughitem.data;
 
-import com.mafuyu404.oelib.api.data.DataDriven;
+import cc.sighs.oelib.data.api.DataDriven;
 import com.mafuyu404.oneenoughitem.api.DomainRegistry;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;

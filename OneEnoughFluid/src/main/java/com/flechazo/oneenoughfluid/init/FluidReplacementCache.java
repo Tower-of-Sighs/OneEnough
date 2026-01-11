@@ -147,9 +147,9 @@ public final class FluidReplacementCache {
 
     private static Optional<Replacements.Rules> getGlobalDefaultRules() {
         try {
-            var cfg = OEIConfig.getDefaultRules("oef");
+            var cfg = OEFConfig.get();
             if (cfg != null) {
-                return Optional.of(cfg.toRules());
+                return Optional.of(cfg.defaultRules().toRules());
             }
         } catch (Exception ignored) {
         }

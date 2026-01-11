@@ -8,5 +8,11 @@
   "tooltip.oneenoughfluid.replaced_with_fluid": "替换为流体: %s",
   "tooltip.oneenoughfluid.source_runtime": "(来自运行时规则)",
   "tooltip.oneenoughfluid.source_saved": "(来自已保存规则)",
-  "tooltip.oneenoughfluid.item_used_as_result": "此流体被用作替换结果"
+  "tooltip.oneenoughfluid.item_used_as_result": "此流体被用作替换结果",
+  "config.oef.common_config.Default_Rules_data": "默认规则（数据目录）",
+  "config.oef.common_config.Default_Rules_data.tooltip": "目录到处理模式映射（replace/retain）",
+  "config.oef.common_config.Default_Rules_tag": "默认规则（标签域）",
+  "config.oef.common_config.Default_Rules_tag.tooltip": "标签域到处理模式映射（replace/retain）",
+  "config.oef.common_config.title": "通用配置",
+  "config.oef.title": "OneEnoughFluid 配置"
 }

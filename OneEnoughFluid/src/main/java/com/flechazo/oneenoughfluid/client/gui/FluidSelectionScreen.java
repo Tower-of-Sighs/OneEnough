@@ -1,6 +1,6 @@
 package com.flechazo.oneenoughfluid.client.gui;
 
-import com.mafuyu404.oelib.client.renderer.FluidRenderers;
+import cc.sighs.oelib.renderer.FluidRenderers;
 import com.mafuyu404.oneenoughitem.client.gui.BaseObjectSelectionScreen;
 import com.mafuyu404.oneenoughitem.client.gui.ReplacementEditorScreen;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
@@ -57,8 +57,8 @@ public class FluidSelectionScreen extends BaseObjectSelectionScreen<Fluid> {
     protected void renderObject(Fluid obj, GuiGraphics graphics, int x, int y) {
         GuiUtils.drawItemBox(graphics, x, y, 18, 18);
         long capacity = FluidType.BUCKET_VOLUME;
-        FluidStack stack = new FluidStack(obj, 1000);
-        FluidRenderers.render(graphics, stack, stack.getAmount(), capacity, x + 1, y + 1, 16, 16);
+        var stack = FluidRenderers.of(obj);
+        FluidRenderers.render(graphics, stack, 1000, capacity, x + 1, y + 1, 16, 16);
     }
 
     @Override

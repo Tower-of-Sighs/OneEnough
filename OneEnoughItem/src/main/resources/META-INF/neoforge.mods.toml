@@ -21,14 +21,7 @@ side = "BOTH"
 [[dependencies.oneenoughitem]]
 modId = "oelib"
 type = "required"
-versionRange = "[0.0.6,)"
-ordering = "NONE"
-side = "BOTH"
-
-[[dependencies.oneenoughitem]]
-modId = "jupiter"
-type = "required"
-versionRange = "[2.0,)"
+versionRange = "[0.0.7,)"
 ordering = "NONE"
 side = "BOTH"
 

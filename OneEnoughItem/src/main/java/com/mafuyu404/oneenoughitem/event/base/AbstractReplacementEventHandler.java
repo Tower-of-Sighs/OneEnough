@@ -1,10 +1,9 @@
 package com.mafuyu404.oneenoughitem.event.base;
 
-import com.mafuyu404.oelib.neoforge.data.DataManager;
+import cc.sighs.oelib.neoforge.data.DataManager;
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.core.HolderLookup;
 
 import java.util.Map;

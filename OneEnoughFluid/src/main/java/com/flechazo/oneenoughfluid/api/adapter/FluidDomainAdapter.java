@@ -1,12 +1,13 @@
 package com.flechazo.oneenoughfluid.api.adapter;
 
+import cc.sighs.oelib.renderer.FluidRef;
+import cc.sighs.oelib.renderer.FluidRenderers;
 import com.flechazo.oneenoughfluid.Oneenoughfluid;
 import com.flechazo.oneenoughfluid.api.adapter.ui.FluidReplacementUiAdapter;
 import com.flechazo.oneenoughfluid.client.gui.FluidSelectionScreen;
 import com.flechazo.oneenoughfluid.client.gui.FluidTagSelectionScreen;
 import com.flechazo.oneenoughfluid.client.gui.cache.GlobalFluidReplacementCache;
 import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
-import com.mafuyu404.oelib.client.renderer.FluidRenderers;
 import com.mafuyu404.oneenoughitem.api.DomainAdapter;
 import com.mafuyu404.oneenoughitem.api.DomainRuntimeCache;
 import com.mafuyu404.oneenoughitem.api.ReplacementUiAdapter;
@@ -140,8 +141,8 @@ public class FluidDomainAdapter implements DomainAdapter {
         }
         ReplacementControl.withSkipReplacement(() -> {
             long capacity = FluidType.BUCKET_VOLUME;
-            FluidStack stack = new FluidStack(fluid, 1000);
-            FluidRenderers.render(graphics, stack, stack.getAmount(), capacity, x + 1, y + 1, 16, 16);
+            var stack = FluidRenderers.of(fluid);
+            FluidRenderers.render(graphics, stack, 1000, capacity, x + 1, y + 1, 16, 16);
         });
     }
 

@@ -162,5 +162,17 @@
   "key.categories.oneenoughitem": "OneEnoughItem",
   "key.oneenoughitem.open_editor": "Open Replacement Editor",
   "oneenoughitem.webeditor.open_browser": "Web editor started at %s, trying to open browser via system command",
-  "oneenoughitem.webeditor.open_browser_manual": "Web editor started at %s, please open it manually"
+  "oneenoughitem.webeditor.open_browser_manual": "Web editor started at %s, please open it manually",
+  "config.oei.common_config.Deeper_Replace": "Deeper Replace",
+  "config.oei.common_config.Deeper_Replace.tooltip": "Whether deep replace is enabled",
+  "config.oei.common_config.Enable_Lite": "Enable Lite Mode",
+  "config.oei.common_config.Enable_Lite.tooltip": "Not of practical use",
+  "config.oei.common_config.Clear_Food_Properties": "Clear Food Properties",
+  "config.oei.common_config.Clear_Food_Properties.tooltip": "Whether clear food properties is enableds",
+  "config.oei.common_config.Default_Rules_data": "Default Rules (data directories)",
+  "config.oei.common_config.Default_Rules_data.tooltip": "Map from directory to processing mode (replace/retain)",
+  "config.oei.common_config.Default_Rules_tag": "Default Rules (tags)",
+  "config.oei.common_config.Default_Rules_tag.tooltip": "Map from tag domain to processing mode (replace/retain)",
+  "config.oei.title": "OneEnoughItem Config",
+  "config.oei.common_config.title": "Common"
 }

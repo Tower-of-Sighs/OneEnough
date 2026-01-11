@@ -33,6 +33,9 @@ repositories {
     maven {
         url "https://maven.sighs.cc/repository/maven-releases/"
     }
+    maven {
+        url "https://maven.sighs.cc/repository/maven-snapshots/"
+    }
 }
 
 base {

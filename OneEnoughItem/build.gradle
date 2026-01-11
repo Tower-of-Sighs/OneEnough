@@ -33,6 +33,9 @@ repositories {
     maven {
         url "https://maven.sighs.cc/repository/maven-releases/"
     }
+    maven {
+        url "https://maven.sighs.cc/repository/maven-snapshots/"
+    }
 }
 
 base {
@@ -124,9 +127,8 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.25.0.322"
     implementation "mezz.jei:jei-1.21.1-neoforge:19.25.0.322"
-    api 'com.mafuyu404.oelib:OELib-neoforge-1.21.1:0.0.6'
+    api 'cc.sighs.oelib:OELib-neoforge-1.21.1:0.0.8-hotfix-20260111.045334-1'
     runtimeOnly "curse.maven:architectury-api-419699:5786327"
-    api "curse.maven:jupiter-1072905:6843052"
     implementation "curse.maven:farmers-delight-398521:6597295"
     implementation "curse.maven:rhino-416294:7104526"
     implementation "curse.maven:kubejs-238086:7143884"

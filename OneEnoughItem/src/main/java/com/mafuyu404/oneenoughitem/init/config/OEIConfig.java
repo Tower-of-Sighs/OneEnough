@@ -1,34 +1,96 @@
 package com.mafuyu404.oneenoughitem.init.config;
 
-import com.iafenvoy.jupiter.config.entry.BooleanEntry;
-import com.iafenvoy.jupiter.interfaces.IConfigEntry;
+import cc.sighs.oelib.config.ConfigManager;
+import cc.sighs.oelib.config.ConfigRecordCodecBuilder;
+import cc.sighs.oelib.config.ConfigUnit;
+import cc.sighs.oelib.config.field.ConfigField;
+import cc.sighs.oelib.config.datafix.ConfigFixRegistry;
+import cc.sighs.oelib.config.model.ConfigStorageFormat;
+import com.mafuyu404.oneenoughitem.data.Replacements;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.resources.ResourceLocation;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.HashMap;
 
-public class OEIConfig extends DomainConfig {
-    public static final IConfigEntry<Boolean> DEEPER_REPLACE =
-            new BooleanEntry("config.oei.common.deeper_replace", false).json("Deeper_Replace");
-    public static final IConfigEntry<Boolean> ENABLE_LITE =
-            new BooleanEntry("config.oei.common.enable_lite", false).json("Enable_Lite");
-    public static final IConfigEntry<Boolean> CLEAR_FOOD_PROPERTIES =
-            new BooleanEntry("config.oei.common.clear_food_properties", false).json("Clear_Food_Properties");
+public record OEIConfig(
+        boolean deeperReplace,
+        boolean enableLite,
+        boolean clearFoodProperties,
+        DefaultRules defaultRules
+) {
+    private static final String FILE_NAME = "common";
 
-    private static final OEIConfig INSTANCE = new OEIConfig();
+    public static final ConfigUnit<OEIConfig> UNIT = ConfigRecordCodecBuilder.create(
+            ResourceLocation.fromNamespaceAndPath("oei", "common_config"),
+            instance -> instance.group(
+                    ConfigField.bool("Deeper_Replace")
+                            .defaultValue(false)
+                            .tooltip()
+                            .forGetter(OEIConfig::deeperReplace),
+                    ConfigField.bool("Enable_Lite")
+                            .defaultValue(false)
+                            .tooltip()
+                            .forGetter(OEIConfig::enableLite),
+                    ConfigField.bool("Clear_Food_Properties")
+                            .defaultValue(false)
+                            .tooltip()
+                            .forGetter(OEIConfig::clearFoodProperties),
+                    ConfigField.map("Default_Rules_data", Codec.STRING, Replacements.ProcessingMode.CODEC)
+                            .defaultValue(new HashMap<>())
+                            .tooltip()
+                            .comment("config.oei.default_rules.data")
+                            .forGetter(cfg -> cfg.defaultRules().data().orElseGet(HashMap::new)),
+                    ConfigField.map("Default_Rules_tag", Codec.STRING, Replacements.ProcessingMode.CODEC)
+                            .defaultValue(new HashMap<>())
+                            .tooltip()
+                            .comment("config.oei.default_rules.tag")
+                            .forGetter(cfg -> cfg.defaultRules().tag().orElseGet(HashMap::new))
+            ).apply(instance, (deeperReplace, enableLite, clearFoodProperties, data, tag) ->
+                    new OEIConfig(
+                            deeperReplace,
+                            enableLite,
+                            clearFoodProperties,
+                            new DefaultRules(
+                                    data.isEmpty() ? Optional.empty() : Optional.of(data),
+                                    tag.isEmpty() ? Optional.empty() : Optional.of(tag)
+                            )
+                    )),
+            meta -> meta
+                    .directory("oei")
+                    .fileName(FILE_NAME)
+                    .format(ConfigStorageFormat.JSON)
+    );
 
-    private OEIConfig() {
-        super("oei", "common.json", new DefaultRules(Optional.empty(), Optional.empty()));
+    public static void register() {
+        ConfigFixRegistry.register(ResourceLocation.fromNamespaceAndPath("oei", "common_config"), 1, b ->
+                b.fix(0, 1, dyn -> {
+                    var ctx = new ConfigFixRegistry.FixContext(dyn);
+                    dyn = ctx.rename("common.Deeper_Replace", "Deeper_Replace");
+                    dyn = new ConfigFixRegistry.FixContext(dyn).rename("common.Clear_Food_Properties", "Clear_Food_Properties");
+                    dyn = new ConfigFixRegistry.FixContext(dyn).rename("common.Enable_Lite", "Enable_Lite");
+                    dyn = new ConfigFixRegistry.FixContext(dyn).rename("common.Default_Rules.data", "Default_Rules_data");
+                    dyn = new ConfigFixRegistry.FixContext(dyn).rename("common.Default_Rules.tag", "Default_Rules_tag");
+                    dyn = new ConfigFixRegistry.FixContext(dyn).rename("Default_Rules.data", "Default_Rules_data");
+                    dyn = new ConfigFixRegistry.FixContext(dyn).rename("Default_Rules.tag", "Default_Rules_tag");
+                    return dyn;
+                })
+        );
+        ConfigManager.registerServer(UNIT, player -> player.hasPermissions(4));
     }
 
-    @Override
-    public void init() {
-        var tab = this.createTab("common", "config.oei.common.category.common");
-        tab.add(DEEPER_REPLACE);
-        tab.add(ENABLE_LITE);
-        tab.add(CLEAR_FOOD_PROPERTIES);
-        tab.add(DEFAULT_RULES);
+    public static OEIConfig get() {
+        return UNIT.get();
     }
 
-    public static OEIConfig getInstance() {
-        return INSTANCE;
+    public record DefaultRules(
+            Optional<Map<String, Replacements.ProcessingMode>> data,
+            Optional<Map<String, Replacements.ProcessingMode>> tag
+    ) {
+        public Replacements.Rules toRules() {
+            return new Replacements.Rules(this.data, this.tag);
+        }
     }
 }

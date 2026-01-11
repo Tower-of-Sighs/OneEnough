@@ -7,5 +7,13 @@
   "tooltip.oneenoughblock.replaced_with_block": "替换为方块: %s",
   "tooltip.oneenoughblock.source_runtime": "(来自运行时规则)",
   "tooltip.oneenoughblock.source_saved": "(来自已保存规则)",
-  "tooltip.oneenoughblock.item_used_as_result": "此方块被用作替换结果"
+  "tooltip.oneenoughblock.item_used_as_result": "此方块被用作替换结果",
+  "config.oeb.common_config.Replace_Existed_Block": "替换已存在的方块",
+  "config.oeb.common_config.Replace_Existed_Block.tooltip": "是否在加载世界时替换已存在的方块",
+  "config.oeb.common_config.Default_Rules_data": "默认规则（数据目录）",
+  "config.oeb.common_config.Default_Rules_data.tooltip": "目录到处理模式映射（replace/retain）",
+  "config.oeb.common_config.Default_Rules_tag": "默认规则（标签域）",
+  "config.oeb.common_config.Default_Rules_tag.tooltip": "标签域到处理模式映射（replace/retain）",
+  "config.oeb.title": "OneEnoughBlock 配置",
+  "config.oeb.common_config.title": "通用配置"
 }

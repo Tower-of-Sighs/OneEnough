@@ -1,11 +1,12 @@
 package com.sighs.oneenoughblock.event;
 
-import com.mafuyu404.oelib.neoforge.data.DataManager;
-import com.mafuyu404.oelib.neoforge.event.DataReloadEvent;
+import cc.sighs.oelib.neoforge.data.DataManager;
+import cc.sighs.oelib.neoforge.event.DataReloadEvent;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.sighs.oneenoughblock.init.BlockReplacementCache;
+import com.sighs.oneenoughblock.init.OEBConfig;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -67,9 +68,9 @@ public class ServerEventHandler {
 
         @Override
         protected Replacements buildReplacements(Replacements r) {
-            var dr = OEIConfig.getDefaultRules("oeb");
+            var dr = OEBConfig.get();
             if (r.rules().isEmpty() && dr != null) {
-                return new Replacements(r.match(), r.result(), Optional.of(dr.toRules()));
+                return new Replacements(r.match(), r.result(), Optional.of(dr.defaultRules().toRules()));
             }
             return r;
         }

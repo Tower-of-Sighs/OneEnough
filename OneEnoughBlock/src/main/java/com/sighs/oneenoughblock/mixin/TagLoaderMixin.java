@@ -4,6 +4,7 @@ import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.MixinUtils;
 import com.sighs.oneenoughblock.init.BlockReplacementCache;
+import com.sighs.oneenoughblock.init.OEBConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagLoader;
@@ -41,8 +42,8 @@ public abstract class TagLoaderMixin<T> {
 
         Replacements.Rules defaultRules = null;
         try {
-            var dr = OEIConfig.getDefaultRules("oeb");
-            if (dr != null) defaultRules = dr.toRules();
+            var dr = OEBConfig.get();
+            defaultRules = dr.defaultRules().toRules();
         } catch (Exception ignored) {
         }
 

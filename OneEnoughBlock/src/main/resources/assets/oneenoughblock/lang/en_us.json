@@ -7,5 +7,13 @@
   "tooltip.oneenoughblock.replaced_with_block": "Replaced with block: %s",
   "tooltip.oneenoughblock.source_runtime": "(From runtime rules)",
   "tooltip.oneenoughblock.source_saved": "(From saved rules)",
-  "tooltip.oneenoughblock.item_used_as_result": "This block is used as a result"
+  "tooltip.oneenoughblock.item_used_as_result": "This block is used as a result",
+  "config.oeb.common_config.Replace_Existed_Block": "Replace Existed Block",
+  "config.oeb.common_config.Replace_Existed_Block.tooltip": "Whether to replace already placed blocks when loading the world",
+  "config.oeb.common_config.Default_Rules_data": "Default Rules (data directories)",
+  "config.oeb.common_config.Default_Rules_data.tooltip": "Map from directory to processing mode (replace/retain)",
+  "config.oeb.common_config.Default_Rules_tag": "Default Rules (tags)",
+  "config.oeb.common_config.Default_Rules_tag.tooltip": "Map from tag domain to processing mode (replace/retain)",
+  "config.oeb.title": "OneEnoughBlock Config",
+  "config.oeb.common_config.title": "Common"
 }

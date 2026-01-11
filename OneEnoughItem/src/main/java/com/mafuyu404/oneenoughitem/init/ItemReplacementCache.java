@@ -49,9 +49,9 @@ public class ItemReplacementCache {
 
     private static Optional<Replacements.Rules> getGlobalDefaultRules() {
         try {
-            var cfg = OEIConfig.getDefaultRules("oei");
+            var cfg = OEIConfig.get();
             if (cfg != null) {
-                return Optional.of(cfg.toRules());
+                return Optional.of(cfg.defaultRules().toRules());
             }
         } catch (Exception ignored) {
         }
