@@ -9,7 +9,9 @@ import com.sighs.oneenoughblock.init.OEBConfig;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +27,8 @@ public class Oneenoughblock {
         OEBConfig.getInstance();
 
         DomainRegistry.register(new BlockDomainAdapter());
+
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         DataRegistry.registerWithNamespaces(Replacements.class, "oeb");
         DataRegistry.registerNamespaceValidator(Replacements.class, "oeb", BlockReplacementValidator.class);

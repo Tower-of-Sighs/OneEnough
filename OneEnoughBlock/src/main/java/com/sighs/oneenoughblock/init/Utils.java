@@ -1,5 +1,6 @@
 package com.sighs.oneenoughblock.init;
 
+import com.sighs.oneenoughblock.Config;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -12,9 +13,10 @@ import net.minecraftforge.registries.tags.ITagManager;
 import java.util.*;
 
 public class Utils {
-
+    @SuppressWarnings("unchecked")
     public static <T extends Comparable<T>> BlockState saveState(BlockState from, BlockState to) {
-        for (Map.Entry<Property<?>, Comparable<?>> entry :  from.getValues().entrySet()) {
+        if (Config.extendedBlockProperty.get()) return to;
+        for (Map.Entry<Property<?>, Comparable<?>> entry : from.getValues().entrySet()) {
             to = to.trySetValue((Property<T>) entry.getKey(), (T) entry.getValue());
         }
         return to;
