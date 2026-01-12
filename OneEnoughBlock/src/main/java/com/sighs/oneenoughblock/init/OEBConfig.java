@@ -1,22 +1,22 @@
 package com.sighs.oneenoughblock.init;
 
-
 import cc.sighs.oelib.config.ConfigManager;
 import cc.sighs.oelib.config.ConfigRecordCodecBuilder;
 import cc.sighs.oelib.config.ConfigUnit;
+import cc.sighs.oelib.config.datafix.ConfigFixRegistry;
 import cc.sighs.oelib.config.field.ConfigField;
 import cc.sighs.oelib.config.model.ConfigStorageFormat;
-import cc.sighs.oelib.config.datafix.ConfigFixRegistry;
-import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.data.Replacements;
+import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Optional;
 import java.util.HashMap;
+import java.util.Optional;
 
 public record OEBConfig(
         boolean replaceExistedBlock,
+        boolean extendedBlockProperty,
         OEIConfig.DefaultRules defaultRules
 ) {
     private static final String FILE_NAME = "common";
@@ -29,6 +29,10 @@ public record OEBConfig(
                             .tooltip()
                             .comment("config.oei.common.replace_existed_block")
                             .forGetter(OEBConfig::replaceExistedBlock),
+                    ConfigField.bool("Extended_Block_Property")
+                            .defaultValue(false)
+                            .tooltip()
+                            .forGetter(OEBConfig::extendedBlockProperty),
                     ConfigField.map("Default_Rules_data", Codec.STRING, Replacements.ProcessingMode.CODEC)
                             .defaultValue(new HashMap<>())
                             .tooltip()
@@ -39,9 +43,10 @@ public record OEBConfig(
                             .tooltip()
                             .comment("config.oeb.default_rules.tag")
                             .forGetter(cfg -> cfg.defaultRules().tag().orElseGet(HashMap::new))
-            ).apply(instance, (replaceExistedBlock, data, tag) ->
+            ).apply(instance, (replaceExistedBlock, extendedBlockProperty, data, tag) ->
                     new OEBConfig(
                             replaceExistedBlock,
+                            extendedBlockProperty,
                             new OEIConfig.DefaultRules(
                                     data.isEmpty() ? Optional.empty() : Optional.of(data),
                                     tag.isEmpty() ? Optional.empty() : Optional.of(tag)

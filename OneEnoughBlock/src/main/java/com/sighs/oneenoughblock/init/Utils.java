@@ -16,6 +16,7 @@ public class Utils {
 
     @SuppressWarnings("unchecked")
     public static <T extends Comparable<T>> BlockState saveState(BlockState from, BlockState to) {
+        if (OEBConfig.get().extendedBlockProperty()) return to;
         for (Map.Entry<Property<?>, Comparable<?>> entry :  from.getValues().entrySet()) {
             to = to.trySetValue((Property<T>) entry.getKey(), (T) entry.getValue());
         }
