@@ -10,6 +10,8 @@
   "tooltip.oneenoughblock.item_used_as_result": "This block is used as a result",
   "config.oeb.common_config.Replace_Existed_Block": "Replace Existed Block",
   "config.oeb.common_config.Replace_Existed_Block.tooltip": "Whether to replace already placed blocks when loading the world",
+  "config.oeb.common_config.Extended_Block_Property": "Keep the block state when replacing blocks",
+  "config.oeb.common_config.Extended_Block_Property.tooltip": "Whether to retain the block state when replacing the block",
   "config.oeb.common_config.Default_Rules_data": "Default Rules (data directories)",
   "config.oeb.common_config.Default_Rules_data.tooltip": "Map from directory to processing mode (replace/retain)",
   "config.oeb.common_config.Default_Rules_tag": "Default Rules (tags)",

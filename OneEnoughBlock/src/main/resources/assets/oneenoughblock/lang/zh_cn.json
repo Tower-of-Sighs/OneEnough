@@ -10,6 +10,8 @@
   "tooltip.oneenoughblock.item_used_as_result": "此方块被用作替换结果",
   "config.oeb.common_config.Replace_Existed_Block": "替换已存在的方块",
   "config.oeb.common_config.Replace_Existed_Block.tooltip": "是否在加载世界时替换已存在的方块",
+  "config.oeb.common_config.Extended_Block_Property": "在替换方块的时候保留方块状态",
+  "config.oeb.common_config.Extended_Block_Property.tooltip": "是否在替换方块的时候保留方块状态",
   "config.oeb.common_config.Default_Rules_data": "默认规则（数据目录）",
   "config.oeb.common_config.Default_Rules_data.tooltip": "目录到处理模式映射（replace/retain）",
   "config.oeb.common_config.Default_Rules_tag": "默认规则（标签域）",
