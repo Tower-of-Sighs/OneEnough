@@ -127,7 +127,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.25.0.322"
     implementation "mezz.jei:jei-1.21.1-neoforge:19.25.0.322"
-    api 'cc.sighs.oelib:OELib-neoforge-1.21.1:0.0.8-hotfix-20260111.045334-1'
+    api 'cc.sighs.oelib:OELib-neoforge-1.21.1:0.1.2'
     runtimeOnly "curse.maven:architectury-api-419699:5786327"
     implementation "curse.maven:farmers-delight-398521:6597295"
     implementation "curse.maven:rhino-416294:7104526"

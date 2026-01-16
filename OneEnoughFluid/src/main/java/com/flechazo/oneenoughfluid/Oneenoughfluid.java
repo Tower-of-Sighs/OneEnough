@@ -28,8 +28,5 @@ public class Oneenoughfluid {
         DomainRegistry.register(new FluidDomainAdapter());
         DataRegistry.registerWithNamespaces(Replacements.class, Replacements.CODEC, "oef");
         DataRegistry.registerNamespaceValidator(Replacements.class, "oef", FluidReplacementValidator.class);
-        if (dist == Dist.CLIENT) {
-            modContainer.registerExtensionPoint(IConfigScreenFactory.class, (minecraft, parent) -> new ConfigScreen(parent, "oef"));
-        }
     }
 }

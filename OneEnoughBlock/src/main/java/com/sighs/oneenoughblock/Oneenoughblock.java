@@ -27,8 +27,5 @@ public class Oneenoughblock {
         DomainRegistry.register(new BlockDomainAdapter());
         DataRegistry.registerWithNamespaces(Replacements.class, Replacements.CODEC, "oeb");
         DataRegistry.registerNamespaceValidator(Replacements.class, "oeb", BlockReplacementValidator.class);
-        if (dist == Dist.CLIENT) {
-            modContainer.registerExtensionPoint(IConfigScreenFactory.class, (minecraft, parent) -> new ConfigScreen(parent, "oeb"));
-        }
     }
 }
