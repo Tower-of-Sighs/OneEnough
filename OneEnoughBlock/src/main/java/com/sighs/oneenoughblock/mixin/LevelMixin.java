@@ -1,6 +1,7 @@
 package com.sighs.oneenoughblock.mixin;
 
 import com.sighs.oneenoughblock.init.BlockReplacementCache;
+import com.sighs.oneenoughblock.init.ReplacementUtils;
 import com.sighs.oneenoughblock.init.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -18,6 +19,10 @@ public abstract class LevelMixin {
 
     @Inject(method = "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z", at = @At("HEAD"), cancellable = true)
     private void onSetBlock(BlockPos pos, BlockState state, int p_46607_, int p_46608_, CallbackInfoReturnable<Boolean> cir) {
+        var result =  ReplacementUtils.getReplacement(state);
+        if (result != null) {
+            cir.setReturnValue(setBlock(pos, result, p_46607_, p_46608_));
+        }/*
         BlockReplacementCache.resolveTarget(state.getBlock()).ifPresent(target -> {
             if (!state.is(target)) {
                 cir.setReturnValue(setBlock(pos, Utils.saveState(state, target.defaultBlockState()), p_46607_, p_46608_));
@@ -28,6 +33,6 @@ public abstract class LevelMixin {
             if (!state.is(target)) {
                 cir.setReturnValue(setBlock(pos, Utils.saveState(state, target.defaultBlockState()), p_46607_, p_46608_));
             }
-        });
+        });*/
     }
 }
