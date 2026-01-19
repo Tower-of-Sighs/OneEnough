@@ -1,6 +1,7 @@
 package com.sighs.oneenoughblock.mixin;
 
 import com.sighs.oneenoughblock.init.BlockReplacementCache;
+import com.sighs.oneenoughblock.init.ReplacementUtils;
 import com.sighs.oneenoughblock.init.Utils;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -23,6 +24,11 @@ public abstract class LevelChunkSectionMixin {
 
     @Inject(method = "setBlockState(IIILnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;", at = @At("HEAD"), cancellable = true)
     public void setBlockState(int x, int y, int z, BlockState state, boolean useLocks, CallbackInfoReturnable<BlockState> cir) {
+        var result =  ReplacementUtils.getReplacement(state);
+        if (result != null) {
+            cir.setReturnValue(setBlockState(x,y,z, result,useLocks));
+        }
+        /*
         BlockReplacementCache.resolveTarget(state.getBlock()).ifPresent(target -> {
             if (!state.is(target)) {
                 cir.setReturnValue(setBlockState(x, y, z, Utils.saveState(state, target.defaultBlockState()), useLocks));
@@ -33,7 +39,7 @@ public abstract class LevelChunkSectionMixin {
             if (!state.is(target)) {
                 cir.setReturnValue(setBlockState(x, y, z, Utils.saveState(state, target.defaultBlockState()), useLocks));
             }
-        });
+        });*/
     }
 
 //    @Inject(method = "getBlockState", at = @At("HEAD"))

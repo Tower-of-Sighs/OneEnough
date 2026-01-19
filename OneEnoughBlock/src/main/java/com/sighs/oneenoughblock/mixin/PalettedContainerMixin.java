@@ -2,6 +2,7 @@ package com.sighs.oneenoughblock.mixin;
 
 import com.sighs.oneenoughblock.api.IPalettedContainer;
 import com.sighs.oneenoughblock.init.BlockReplacementCache;
+import com.sighs.oneenoughblock.init.ReplacementUtils;
 import net.minecraft.util.BitStorage;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -48,10 +49,12 @@ public class PalettedContainerMixin implements IPalettedContainer {
     }
 
     private Optional<BlockState> resolveReplacement(BlockState state) {
+        return Optional.ofNullable(ReplacementUtils.getReplacement(state));
+        /*
         Block b = state.getBlock();
         return BlockReplacementCache.resolveTarget(b)
                 .or(() -> BlockReplacementCache.resolveTargetByTags(b))
                 .map(Block::defaultBlockState)
-                .filter(rs -> !state.is(rs.getBlock()));
+                .filter(rs -> !state.is(rs.getBlock()));*/
     }
 }
