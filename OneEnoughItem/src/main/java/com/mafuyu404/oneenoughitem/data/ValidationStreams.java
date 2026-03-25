@@ -1,6 +1,6 @@
 package com.mafuyu404.oneenoughitem.data;
 
-import com.mafuyu404.oelib.api.data.DataValidator;
+import cc.sighs.oelib.data.api.DataValidator;
 
 import java.util.Objects;
 import java.util.function.Function;

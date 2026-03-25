@@ -6,7 +6,8 @@ import com.flechazo.oneenoughfluid.client.gui.FluidSelectionScreen;
 import com.flechazo.oneenoughfluid.client.gui.FluidTagSelectionScreen;
 import com.flechazo.oneenoughfluid.client.gui.cache.GlobalFluidReplacementCache;
 import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
-import com.mafuyu404.oelib.forge.client.renderer.FluidRenderUtils;
+import cc.sighs.oelib.renderer.FluidRef;
+import cc.sighs.oelib.renderer.FluidRenderers;
 import com.mafuyu404.oneenoughitem.api.DomainAdapter;
 import com.mafuyu404.oneenoughitem.api.DomainRuntimeCache;
 import com.mafuyu404.oneenoughitem.api.ReplacementUiAdapter;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -138,8 +140,9 @@ public class FluidDomainAdapter implements DomainAdapter {
             return;
         }
         ReplacementControl.withSkipReplacement(() -> {
-            FluidStack stack = new FluidStack(fluid, 1000);
-            FluidRenderUtils.renderFluid(graphics, stack, x + 1, y + 1, 16, 16);
+            long capacity = FluidType.BUCKET_VOLUME;
+            var stack = FluidRenderers.of(fluid);
+            FluidRenderers.render(graphics, stack, 1000, capacity, x + 1, y + 1, 16, 16);
         });
     }
 

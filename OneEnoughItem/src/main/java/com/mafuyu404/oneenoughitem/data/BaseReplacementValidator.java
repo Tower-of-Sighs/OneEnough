@@ -1,6 +1,6 @@
 package com.mafuyu404.oneenoughitem.data;
 
-import com.mafuyu404.oelib.api.data.DataValidator;
+import cc.sighs.oelib.data.api.DataValidator;
 import net.minecraft.resources.ResourceLocation;
 
 public abstract class BaseReplacementValidator implements DataValidator<Replacements> {

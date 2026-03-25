@@ -21,7 +21,7 @@ public class ChunkSerializerMixin {
     )
     private static PalettedContainer<BlockState>
     applyReplacementOnRead(PalettedContainer<BlockState> container) {
-        if (OEBConfig.REPLACE_EXISTED_BLOCK.getValue()) {
+        if (OEBConfig.get().replaceExistedBlock()) {
             ((IPalettedContainer) container).handleReplace();
         }
         return container;

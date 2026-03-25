@@ -1,7 +1,7 @@
 package com.mafuyu404.oneenoughitem.event;
 
-import com.mafuyu404.oelib.forge.data.DataManager;
-import com.mafuyu404.oelib.forge.event.DataReloadEvent;
+import cc.sighs.oelib.forge.data.DataManager;
+import cc.sighs.oelib.forge.event.DataReloadEvent;
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
@@ -64,9 +64,9 @@ public class ServerEventHandler {
 
         @Override
         protected Replacements buildReplacements(Replacements r) {
-            var dr = OEIConfig.getDefaultRules("oei");
+            var dr = OEIConfig.get();
             if (r.rules().isEmpty() && dr != null) {
-                return new Replacements(r.match(), r.result(), Optional.of(dr.toRules()));
+                return new Replacements(r.match(), r.result(), Optional.of(dr.defaultRules().toRules()));
             }
             return r;
         }
