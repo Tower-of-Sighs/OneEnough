@@ -1,6 +1,6 @@
 package com.mafuyu404.oneenoughitem.event.base;
 
-import com.mafuyu404.oelib.forge.data.DataManager;
+import cc.sighs.oelib.forge.data.DataManager;
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import net.minecraft.resources.ResourceLocation;

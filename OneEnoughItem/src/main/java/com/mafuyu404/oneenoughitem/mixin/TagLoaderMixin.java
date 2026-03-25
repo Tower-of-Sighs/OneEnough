@@ -72,9 +72,9 @@ public abstract class TagLoaderMixin<T> {
 
         Replacements.Rules defaultRules = null;
         try {
-            var dr = OEIConfig.getDefaultRules("oei");
+            var dr = OEIConfig.get();
             if (dr != null) {
-                defaultRules = dr.toRules();
+                defaultRules = dr.defaultRules().toRules();
             }
         } catch (Exception ignored) {
         }

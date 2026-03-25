@@ -1,6 +1,5 @@
 package com.sighs.oneenoughblock.init;
 
-import com.sighs.oneenoughblock.Config;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.level.block.Block;
@@ -29,7 +28,7 @@ public class ReplacementUtils {
             return null;
         }
         //是否开启原型继承
-        if (Config.extendedBlockProperty.get()) {
+        if (OEBConfig.get().extendedBlockProperty()) {
             if (propertyCache.containsKey(state)) {
                 return propertyCache.get(state);
             }

@@ -1,6 +1,6 @@
 package com.flechazo.oneenoughfluid.client.gui;
 
-import com.mafuyu404.oelib.forge.client.renderer.FluidRenderUtils;
+import cc.sighs.oelib.renderer.FluidRenderers;
 import com.mafuyu404.oneenoughitem.client.gui.BaseObjectSelectionScreen;
 import com.mafuyu404.oneenoughitem.client.gui.ReplacementEditorScreen;
 import com.mafuyu404.oneenoughitem.client.gui.util.GuiUtils;
@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -55,9 +56,9 @@ public class FluidSelectionScreen extends BaseObjectSelectionScreen<Fluid> {
     @Override
     protected void renderObject(Fluid obj, GuiGraphics graphics, int x, int y) {
         GuiUtils.drawItemBox(graphics, x, y, 18, 18);
-
-        FluidStack stack = new FluidStack(obj, 1000);
-        FluidRenderUtils.renderFluid(graphics, stack, x + 1, y + 1, 16, 16);
+        long capacity = FluidType.BUCKET_VOLUME;
+        var stack = FluidRenderers.of(obj);
+        FluidRenderers.render(graphics, stack, 1000, capacity, x + 1, y + 1, 16, 16);
     }
 
     @Override
