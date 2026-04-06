@@ -69,10 +69,3 @@ mandatory = true
 versionRange = "${oelib_version_range}"
 ordering = "NONE"
 side = "BOTH"
-
-[[dependencies."${mod_id}"]]
-modId = "jupiter"
-mandatory = true
-versionRange = "[2.0, )"
-ordering = "NONE"
-side = "BOTH"

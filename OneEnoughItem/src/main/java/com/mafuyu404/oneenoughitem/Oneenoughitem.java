@@ -11,7 +11,6 @@ import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.MixinUtils;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -24,15 +23,10 @@ import org.apache.logging.log4j.Logger;
 public class Oneenoughitem {
     public static final String MODID = "oneenoughitem";
     public static final Logger LOGGER = LogManager.getLogger();
-
     public Oneenoughitem() {
         MixinUtils.setStrategy(new OEIReplacementStrategy());
         OEIConfig.register();
         DomainRegistry.register(new ItemDomainAdapter());
-        var context = ModLoadingContext.get();
-        if (FMLEnvironment.dist.equals(Dist.CLIENT)) {
-            context.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(((minecraft, screen) -> new ConfigScreen(screen, "oei"))));
-        }
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
     }
 
