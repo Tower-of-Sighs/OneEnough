@@ -27,12 +27,7 @@ public class Oneenoughitem {
         MixinUtils.setStrategy(new OEIReplacementStrategy());
         OEIConfig.register();
         DomainRegistry.register(new ItemDomainAdapter());
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-    }
-
-    private void setup(final FMLCommonSetupEvent event) {
         DataRegistry.registerWithNamespaces(Replacements.class, Replacements.CODEC, "oei");
         DataRegistry.registerNamespaceValidator(Replacements.class, "oei", ItemReplacementValidator.class);
-        LOGGER.info("OneEnoughItem initialized with OELib data-driven framework");
     }
 }
