@@ -5,6 +5,7 @@ import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.ItemReplacementCache;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.MixinUtils;
+import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagEntry;
@@ -16,10 +17,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Mixin(TagLoader.class)
 public abstract class TagLoaderMixin<T> {
@@ -79,15 +83,25 @@ public abstract class TagLoaderMixin<T> {
         } catch (Exception ignored) {
         }
 
-        int totalTags = 0, totalDropped = 0;
+        int totalTags = 0, totalDropped = 0, totalMirrored = 0;
 
         for (Map.Entry<ResourceLocation, List<TagLoader.EntryWithSource>> tagEntry : tags.entrySet()) {
             ResourceLocation tagId = tagEntry.getKey();
             List<TagLoader.EntryWithSource> entries = tagEntry.getValue();
             if (entries == null || entries.isEmpty()) continue;
 
+            Set<String> existingItemIds = new HashSet<>();
+            for (TagLoader.EntryWithSource tracked : entries) {
+                TagEntry e = tracked.entry();
+                if (!tracked.remove() && !e.isTag()) {
+                    existingItemIds.add(e.getId().toString());
+                }
+            }
+
             Iterator<TagLoader.EntryWithSource> iterator = entries.iterator();
+            List<TagLoader.EntryWithSource> mirroredEntries = new ArrayList<>();
             int dropped = 0;
+            int mirrored = 0;
             boolean touched = false;
 
             while (iterator.hasNext()) {
@@ -105,6 +119,18 @@ public abstract class TagLoaderMixin<T> {
                 }
 
                 if (mapped != null) {
+                    if (!tracked.remove() && shouldMirrorTags(mapped, existingItemIds)) {
+                        mirroredEntries.add(new TagLoader.EntryWithSource(
+                                TagEntry.element(new ResourceLocation(mapped)),
+                                "oneenoughitem:tag_mirror"
+                        ));
+                        existingItemIds.add(mapped);
+                        mirrored++;
+                        touched = true;
+                        Oneenoughitem.LOGGER.debug("Item tag mirror: add '{}' to {} (source='{}')",
+                                mapped, tagId, fromStr);
+                    }
+
                     boolean shouldReplace = false;
 
                     Replacements.Rules rules = currentItemRules.get(fromStr);
@@ -132,18 +158,27 @@ public abstract class TagLoaderMixin<T> {
                 }
             }
 
+            entries.addAll(mirroredEntries);
+
             if (touched) {
                 totalTags++;
                 totalDropped += dropped;
-                Oneenoughitem.LOGGER.info("Item tag rewrite: {} -> dropped={}",
-                        tagId, dropped);
+                totalMirrored += mirrored;
+                Oneenoughitem.LOGGER.info("Item tag rewrite: {} -> dropped={}, mirrored={}",
+                        tagId, dropped, mirrored);
             }
         }
 
         if (totalTags > 0) {
-            Oneenoughitem.LOGGER.info("Item tags rewrite summary (rule-based): affectedTags={}, totalDropped={}",
-                    totalTags, totalDropped);
+            Oneenoughitem.LOGGER.info("Item tags rewrite summary (rule-based): affectedTags={}, totalDropped={}, totalMirrored={}",
+                    totalTags, totalDropped, totalMirrored);
         }
+    }
+
+    private boolean shouldMirrorTags(String mapped, Set<String> existingItemIds) {
+        if (!OEIConfig.get().deeperReplace()) return false;
+        if (Utils.isItemIdEmpty(mapped) || existingItemIds.contains(mapped)) return false;
+        return Utils.getItemById(mapped) != null;
     }
 
     private String getTagType(String directory) {
