@@ -4,12 +4,14 @@ import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.Utils;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ItemReplacementCache {
     private static final ConcurrentHashMap<String, String> ItemMapCache = new ConcurrentHashMap<>();
@@ -22,13 +24,51 @@ public class ItemReplacementCache {
     private static final ConcurrentHashMap<String, Collection<Item>> ReverseItemObjectCache = new ConcurrentHashMap<>();
     // Item 对象级反向索引（按引用比较），供 ItemStack.is(Item) 热路径使用，惰性构建
     private static volatile Map<Item, Set<Item>> ItemIdentityIndex = null;
+    // 源 Item -> 替换目标（含 delegate），供 ItemStack 构造期的 forgeInit 使用，惰性构建
+    private static volatile Map<Item, Replacement> ReplacementIndex = null;
     private static volatile int indexGeneration = 0;
+
+    public record Replacement(Item item, Holder.Reference<Item> delegate) {
+    }
     private static volatile Map<String, String> ReloadOverrideItemMap = null;
 
     private static void invalidateIndexes() {
         indexGeneration++;
         ItemIdentityIndex = null;
+        ReplacementIndex = null;
         ReverseItemObjectCache.clear();
+    }
+
+    private static Map<Item, Replacement> replacementIndex() {
+        Map<Item, Replacement> index = ReplacementIndex;
+        if (index != null) return index;
+        int gen = indexGeneration;
+        Map<Item, Replacement> built = new IdentityHashMap<>();
+        ItemMapCache.forEach((sourceId, resultId) -> {
+            Item source = Utils.getItemById(sourceId);
+            Item result = Utils.getItemById(resultId);
+            if (source == null) return;
+            if (result == null) {
+                Oneenoughitem.LOGGER.warn("ItemStackMixin: Replacement item is null for targetItemId: {}, original item: {}",
+                        resultId, sourceId);
+                return;
+            }
+            try {
+                built.put(source, new Replacement(result, ForgeRegistries.ITEMS.getDelegateOrThrow(result)));
+            } catch (Exception e) {
+                Oneenoughitem.LOGGER.error("ItemStackMixin: Failed to index replacement: {} -> {}", sourceId, resultId, e);
+            }
+        });
+        if (gen == indexGeneration) ReplacementIndex = built;
+        return built;
+    }
+
+    /**
+     * ItemStack 构造期热路径：按引用查源物品的替换目标，未命中返回 null。
+     * 重载覆盖期间的映射不同于 ItemMapCache，调用方需先判断 hasReloadOverride()。
+     */
+    public static Replacement replacementOf(Item source) {
+        return replacementIndex().get(source);
     }
 
     private static Map<Item, Set<Item>> identityIndex() {

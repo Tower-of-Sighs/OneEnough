@@ -9,6 +9,7 @@ import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -51,6 +52,18 @@ public abstract class ItemStackMixin {
             return;
         }
 
+        if (!ItemReplacementCache.hasReloadOverride()) {
+            // 常规路径：按引用查表，不涉及注册名与字符串
+            ItemReplacementCache.Replacement replacement = ItemReplacementCache.replacementOf(item);
+            if (replacement == null) {
+                return;
+            }
+            if (replacement.item() == Items.AIR && isInCreativeModeTabBuilding()) return;
+            item = replacement.item();
+            delegate = replacement.delegate();
+            return;
+        }
+
         try {
             String originItemId = Utils.getItemRegistryName(item);
             if (originItemId == null) {
@@ -77,16 +90,13 @@ public abstract class ItemStackMixin {
 
     @Inject(method = "is(Ljava/util/function/Predicate;)Z", at = @At("HEAD"), cancellable = true)
     private void extend(Predicate<Holder<Item>> predicate, CallbackInfoReturnable<Boolean> cir) {
+        if (!OEIConfig.get().deeperReplace()) return;
         if (predicate.test(getItem().builtInRegistryHolder())) return;
-        // 直接匹配失败：先查是否有源物品（廉价），再读配置；结果与原版一致时避免原版重复执行 predicate
-        var sources = ItemReplacementCache.sourceItemsOf(item);
         boolean matched = false;
-        if (!sources.isEmpty() && OEIConfig.get().deeperReplace()) {
-            for (Item matchItem : sources) {
-                if (predicate.test(matchItem.builtInRegistryHolder())) {
-                    matched = true;
-                    break;
-                }
+        for (Item matchItem : ItemReplacementCache.sourceItemsOf(item)) {
+            if (predicate.test(matchItem.builtInRegistryHolder())) {
+                matched = true;
+                break;
             }
         }
         cir.setReturnValue(matched);
@@ -94,9 +104,10 @@ public abstract class ItemStackMixin {
 
     @Inject(method = "is(Lnet/minecraft/core/Holder;)Z", at = @At("HEAD"), cancellable = true)
     private void extend(Holder<Item> itemHolder, CallbackInfoReturnable<Boolean> cir) {
+        if (!OEIConfig.get().deeperReplace()) return;
         if (getItem().builtInRegistryHolder() == itemHolder) return;
         var sources = ItemReplacementCache.sourceItemsOf(item);
-        if (sources.isEmpty() || !OEIConfig.get().deeperReplace()) return;
+        if (sources.isEmpty()) return;
         for (Item matchItem : sources) {
             if (matchItem.builtInRegistryHolder() == itemHolder) {
                 cir.setReturnValue(true);
@@ -108,9 +119,8 @@ public abstract class ItemStackMixin {
 
     @Inject(method = "is(Lnet/minecraft/world/item/Item;)Z", at = @At("HEAD"), cancellable = true)
     private void extend(Item inputItem, CallbackInfoReturnable<Boolean> cir) {
-        // 先做廉价的引用查表，仅在命中时才读配置；未命中交给原版返回 false
-        if (item != inputItem && ItemReplacementCache.isReplacedBy(inputItem, item)
-                && OEIConfig.get().deeperReplace()) {
+        if (!OEIConfig.get().deeperReplace()) return;
+        if (item != inputItem && ItemReplacementCache.isReplacedBy(inputItem, item)) {
             cir.setReturnValue(true);
         }
     }
