@@ -11,9 +11,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Utils {
+    // Item 注册名在注册完成后不变；缓存避免 ForgeRegistry.getKey 的线性反查与字符串拼接
+    private static final Map<Item, String> ITEM_NAME_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
     public static String getItemRegistryName(Item item) {
         if (item == null) {
             return null;
+        }
+
+        String cached = ITEM_NAME_CACHE.get(item);
+        if (cached != null) {
+            return cached;
         }
 
         ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(item);
@@ -22,7 +30,9 @@ public class Utils {
             return null;
         }
 
-        return registryName.toString();
+        String name = registryName.toString();
+        ITEM_NAME_CACHE.put(item, name);
+        return name;
     }
 
     public static Item getItemById(String registryName) {

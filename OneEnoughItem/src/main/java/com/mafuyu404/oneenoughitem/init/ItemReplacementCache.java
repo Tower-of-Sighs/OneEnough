@@ -6,6 +6,7 @@ import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +16,64 @@ public class ItemReplacementCache {
     private static final ConcurrentHashMap<String, String> TagMapCache = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Replacements.Rules> ItemRulesCache = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Replacements.Rules> TagRulesCache = new ConcurrentHashMap<>();
+    // 反向索引：替换结果 id -> 所有源 id，避免热路径上遍历 ItemMapCache
+    private static final ConcurrentHashMap<String, Set<String>> ReverseItemCache = new ConcurrentHashMap<>();
+    // 反向索引对应的 Item 集合（惰性解析，映射变化时清空）
+    private static final ConcurrentHashMap<String, Collection<Item>> ReverseItemObjectCache = new ConcurrentHashMap<>();
+    // Item 对象级反向索引（按引用比较），供 ItemStack.is(Item) 热路径使用，惰性构建
+    private static volatile Map<Item, Set<Item>> ItemIdentityIndex = null;
+    private static volatile int indexGeneration = 0;
     private static volatile Map<String, String> ReloadOverrideItemMap = null;
+
+    private static void invalidateIndexes() {
+        indexGeneration++;
+        ItemIdentityIndex = null;
+        ReverseItemObjectCache.clear();
+    }
+
+    private static Map<Item, Set<Item>> identityIndex() {
+        Map<Item, Set<Item>> index = ItemIdentityIndex;
+        if (index != null) return index;
+        int gen = indexGeneration;
+        Map<Item, Set<Item>> built = new IdentityHashMap<>();
+        ReverseItemCache.forEach((resultId, sourceIds) -> {
+            Item result = Utils.getItemById(resultId);
+            if (result == null || result == Items.AIR) return;
+            Set<Item> sources = Collections.newSetFromMap(new IdentityHashMap<>());
+            for (String sourceId : sourceIds) {
+                Item source = Utils.getItemById(sourceId);
+                if (source != null && source != Items.AIR) sources.add(source);
+            }
+            if (!sources.isEmpty()) built.put(result, sources);
+        });
+        if (gen == indexGeneration) ItemIdentityIndex = built;
+        return built;
+    }
+
+    /**
+     * ItemStack.is(Item) 热路径：source 是否被替换成了 result。仅按引用查表，不涉及字符串。
+     */
+    public static boolean isReplacedBy(Item source, Item result) {
+        Set<Item> sources = identityIndex().get(result);
+        return sources != null && sources.contains(source);
+    }
+
+    private static void indexItem(String sourceId, String resultId) {
+        String old = ItemMapCache.put(sourceId, resultId);
+        if (old != null && !old.equals(resultId)) {
+            unindexItem(sourceId, old);
+        }
+        ReverseItemCache.computeIfAbsent(resultId, k -> ConcurrentHashMap.newKeySet()).add(sourceId);
+        invalidateIndexes();
+    }
+
+    private static void unindexItem(String sourceId, String resultId) {
+        ReverseItemCache.computeIfPresent(resultId, (k, set) -> {
+            set.remove(sourceId);
+            return set.isEmpty() ? null : set;
+        });
+        invalidateIndexes();
+    }
 
     public static String matchItem(String id) {
         return Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).getOrDefault(id, null);
@@ -80,7 +138,7 @@ public class ItemReplacementCache {
         for (Item item : resolvedItems) {
             String id = Utils.getItemRegistryName(item);
             if (id != null) {
-                ItemMapCache.put(id, replacement.result());
+                indexItem(id, replacement.result());
                 replacement.rules().ifPresent(rules -> ItemRulesCache.put(id, rules));
                 Oneenoughitem.LOGGER.debug("Added item replacement mapping: {} -> {}", id, replacement.result());
             }
@@ -122,6 +180,8 @@ public class ItemReplacementCache {
         int previousItemSize = ItemMapCache.size();
         int previousTagSize = TagMapCache.size();
         ItemMapCache.clear();
+        ReverseItemCache.clear();
+        invalidateIndexes();
         TagMapCache.clear();
         ItemRulesCache.clear();
         TagRulesCache.clear();
@@ -137,6 +197,7 @@ public class ItemReplacementCache {
     public static boolean removeItemReplacement(String itemId) {
         if (itemId != null && ItemMapCache.containsKey(itemId)) {
             String removed = ItemMapCache.remove(itemId);
+            if (removed != null) unindexItem(itemId, removed);
             ItemRulesCache.remove(itemId);
             Oneenoughitem.LOGGER.debug("Removed item replacement from runtime cache: {} -> {}", itemId, removed);
             return true;
@@ -185,20 +246,28 @@ public class ItemReplacementCache {
         }
     }
 
+    private static final Set<String> NO_SOURCES = Collections.emptySet();
+
+    /**
+     * 返回映射到 id 的所有源物品 id。O(1) 查反向索引，返回的集合只读且为实时视图。
+     */
     public static Collection<String> trackSourceIdOf(String id) {
-        Collection<String> result = new HashSet<>();
-        ItemMapCache.forEach((matchItem, resultItem) -> {
-            if (resultItem.equals(id)) result.add(matchItem);
-        });
-        return result;
+        if (id == null) return NO_SOURCES;
+        Set<String> set = ReverseItemCache.get(id);
+        return set == null ? NO_SOURCES : Collections.unmodifiableSet(set);
     }
 
     public static Collection<Item> trackSourceOf(String id) {
-        Collection<Item> result = new HashSet<>();
-        ItemMapCache.forEach((matchItem, resultItem) -> {
-            if (resultItem.equals(id)) result.add(Utils.getItemById(matchItem));
+        if (id == null) return Collections.emptySet();
+        if (!ReverseItemCache.containsKey(id)) return Collections.emptySet();
+        return ReverseItemObjectCache.computeIfAbsent(id, k -> {
+            Collection<Item> result = new HashSet<>();
+            for (String sourceId : ReverseItemCache.getOrDefault(k, NO_SOURCES)) {
+                Item item = Utils.getItemById(sourceId);
+                if (item != null) result.add(item);
+            }
+            return result;
         });
-        return result;
     }
 
     // 开始/结束 "重载期覆盖映射"

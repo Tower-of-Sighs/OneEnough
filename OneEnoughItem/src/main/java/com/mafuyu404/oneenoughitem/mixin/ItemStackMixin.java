@@ -111,22 +111,9 @@ public abstract class ItemStackMixin {
     @Inject(method = "is(Lnet/minecraft/world/item/Item;)Z", at = @At("HEAD"), cancellable = true)
     private void extend(Item inputItem, CallbackInfoReturnable<Boolean> cir) {
         if (!OEIConfig.get().deeperReplace()) return;
-        if (item != inputItem) {
-            String inputItemId = Utils.getItemRegistryName(inputItem);
-            String ItemId = Utils.getItemRegistryName(item);
-
-            if (Utils.isItemIdEmpty(inputItemId) || Utils.isItemIdEmpty(ItemId)) return;
-
-            boolean matched = false;
-
-            for (String matchId : ItemReplacementCache.trackSourceIdOf(ItemId)) {
-                if (matchId.equals(inputItemId)) {
-                    matched = true;
-                    break;
-                }
-            }
-
-            cir.setReturnValue(matched);
+        // 不匹配时不取消，交给原版返回 false；只有确认是被替换的源物品才强制返回 true
+        if (item != inputItem && ItemReplacementCache.isReplacedBy(inputItem, item)) {
+            cir.setReturnValue(true);
         }
     }
 
