@@ -77,42 +77,40 @@ public abstract class ItemStackMixin {
 
     @Inject(method = "is(Ljava/util/function/Predicate;)Z", at = @At("HEAD"), cancellable = true)
     private void extend(Predicate<Holder<Item>> predicate, CallbackInfoReturnable<Boolean> cir) {
-        if (!OEIConfig.get().deeperReplace()) return;
-        if (!predicate.test(getItem().builtInRegistryHolder())) {
-            String itemId = Utils.getItemRegistryName(item);
-
-            boolean matched = false;
-
-            for (Item matchItem : ItemReplacementCache.trackSourceOf(itemId)) {
-                if (predicate.test(matchItem.builtInRegistryHolder())) matched = true;
-            }
-            cir.setReturnValue(matched);
-        }
-    }
-
-    @Inject(method = "is(Lnet/minecraft/core/Holder;)Z", at = @At("HEAD"), cancellable = true)
-    private void extend(Holder<Item> itemHolder, CallbackInfoReturnable<Boolean> cir) {
-        if (!OEIConfig.get().deeperReplace()) return;
-        if (getItem().builtInRegistryHolder() != itemHolder) {
-            String itemId = Utils.getItemRegistryName(item);
-
-            boolean matched = false;
-
-            for (Item matchItem : ItemReplacementCache.trackSourceOf(itemId)) {
-                if (matchItem.builtInRegistryHolder() == itemHolder) {
+        if (predicate.test(getItem().builtInRegistryHolder())) return;
+        // 直接匹配失败：先查是否有源物品（廉价），再读配置；结果与原版一致时避免原版重复执行 predicate
+        var sources = ItemReplacementCache.sourceItemsOf(item);
+        boolean matched = false;
+        if (!sources.isEmpty() && OEIConfig.get().deeperReplace()) {
+            for (Item matchItem : sources) {
+                if (predicate.test(matchItem.builtInRegistryHolder())) {
                     matched = true;
                     break;
                 }
             }
-            cir.setReturnValue(matched);
         }
+        cir.setReturnValue(matched);
+    }
+
+    @Inject(method = "is(Lnet/minecraft/core/Holder;)Z", at = @At("HEAD"), cancellable = true)
+    private void extend(Holder<Item> itemHolder, CallbackInfoReturnable<Boolean> cir) {
+        if (getItem().builtInRegistryHolder() == itemHolder) return;
+        var sources = ItemReplacementCache.sourceItemsOf(item);
+        if (sources.isEmpty() || !OEIConfig.get().deeperReplace()) return;
+        for (Item matchItem : sources) {
+            if (matchItem.builtInRegistryHolder() == itemHolder) {
+                cir.setReturnValue(true);
+                return;
+            }
+        }
+        cir.setReturnValue(false);
     }
 
     @Inject(method = "is(Lnet/minecraft/world/item/Item;)Z", at = @At("HEAD"), cancellable = true)
     private void extend(Item inputItem, CallbackInfoReturnable<Boolean> cir) {
-        if (!OEIConfig.get().deeperReplace()) return;
-        // 不匹配时不取消，交给原版返回 false；只有确认是被替换的源物品才强制返回 true
-        if (item != inputItem && ItemReplacementCache.isReplacedBy(inputItem, item)) {
+        // 先做廉价的引用查表，仅在命中时才读配置；未命中交给原版返回 false
+        if (item != inputItem && ItemReplacementCache.isReplacedBy(inputItem, item)
+                && OEIConfig.get().deeperReplace()) {
             cir.setReturnValue(true);
         }
     }

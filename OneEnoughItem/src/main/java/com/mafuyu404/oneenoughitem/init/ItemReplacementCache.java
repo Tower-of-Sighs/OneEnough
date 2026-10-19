@@ -53,6 +53,11 @@ public class ItemReplacementCache {
     /**
      * ItemStack.is(Item) 热路径：source 是否被替换成了 result。仅按引用查表，不涉及字符串。
      */
+    public static Set<Item> sourceItemsOf(Item result) {
+        Set<Item> sources = identityIndex().get(result);
+        return sources == null ? Collections.emptySet() : sources;
+    }
+
     public static boolean isReplacedBy(Item source, Item result) {
         Set<Item> sources = identityIndex().get(result);
         return sources != null && sources.contains(source);
