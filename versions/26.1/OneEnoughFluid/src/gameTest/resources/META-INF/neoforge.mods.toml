@@ -1,0 +1,8 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="oneenough_regression"
+version="1.0.0"
+displayName="OneEnough regression tests"

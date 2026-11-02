@@ -3,6 +3,7 @@ package com.flechazo.oneenoughfluid.init;
 import com.flechazo.oneenoughfluid.Oneenoughfluid;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
+import com.mafuyu404.oneenoughitem.util.ReplacementIndex;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
@@ -18,6 +19,37 @@ public final class FluidReplacementCache {
     private static final ConcurrentHashMap<String, Replacements.Rules> FluidRulesCache = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Replacements.Rules> TagRulesCache = new ConcurrentHashMap<>();
     private static volatile Map<String, String> ReloadOverrideFluidMap = null;
+    private static volatile ReplacementIndex<Fluid> registryIndex;
+
+    private static synchronized void invalidateIndex() {
+        registryIndex = null;
+    }
+
+    private static synchronized ReplacementIndex<Fluid> index() {
+        if (registryIndex == null) {
+            Map<Fluid, Fluid> mappings = new IdentityHashMap<>();
+            Objects.requireNonNullElse(ReloadOverrideFluidMap, FluidMapCache).forEach((sourceId, targetId) -> {
+                Fluid source = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(sourceId));
+                Fluid target = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(targetId));
+                if (source != null && target != null) mappings.put(source, target);
+            });
+            registryIndex = new ReplacementIndex<>(mappings);
+        }
+        return registryIndex;
+    }
+
+    public static Fluid replacementOf(Fluid source) {
+        if (!hasAnyMappings()) return null;
+        ReplacementIndex<Fluid> current = registryIndex;
+        return (current != null ? current : index()).replacementOf(source);
+    }
+
+    public static boolean matches(Fluid actual, Fluid expected) {
+        if (actual == expected) return true;
+        if (!hasAnyMappings() || actual == null || expected == null) return false;
+        ReplacementIndex<Fluid> current = registryIndex;
+        return (current != null ? current : index()).matches(actual, expected);
+    }
 
     public static String matchFluid(String id) {
         return Objects.requireNonNullElse(ReloadOverrideFluidMap, FluidMapCache).getOrDefault(id, null);
@@ -60,10 +92,11 @@ public final class FluidReplacementCache {
         TagMapCache.clear();
         FluidRulesCache.clear();
         TagRulesCache.clear();
+        invalidateIndex();
     }
 
     public static boolean hasAnyMappings() {
-        return !FluidMapCache.isEmpty() || !TagMapCache.isEmpty();
+        return !Objects.requireNonNullElse(ReloadOverrideFluidMap, FluidMapCache).isEmpty() || !TagMapCache.isEmpty();
     }
 
     public static void putReplacement(Replacements replacement) {
@@ -90,6 +123,14 @@ public final class FluidReplacementCache {
                 }
             }
         });
+        // Expand tag rules for runtime FluidStack and EMI lookups as well as JSON replacement.
+        for (Fluid source : resolve(replacement.match())) {
+            ResourceLocation id = ForgeRegistries.FLUIDS.getKey(source);
+            if (id == null) continue;
+            FluidMapCache.put(id.toString(), result);
+            replacement.rules().ifPresent(rules -> FluidRulesCache.put(id.toString(), rules));
+        }
+        invalidateIndex();
     }
 
 
@@ -97,6 +138,7 @@ public final class FluidReplacementCache {
         if (fluidId != null && FluidMapCache.containsKey(fluidId)) {
             String removed = FluidMapCache.remove(fluidId);
             FluidRulesCache.remove(fluidId);
+            invalidateIndex();
             Oneenoughfluid.LOGGER.debug("Removed fluid replacement from runtime cache: {} -> {}", fluidId, removed);
             return true;
         }
@@ -194,12 +236,14 @@ public final class FluidReplacementCache {
 
     public static void beginReloadOverride(Map<String, String> currentFluidMap) {
         if (currentFluidMap == null || currentFluidMap.isEmpty()) {
-            ReloadOverrideFluidMap = null;
+            ReloadOverrideFluidMap = Map.of();
+            invalidateIndex();
             return;
         }
+        ReloadOverrideFluidMap = new HashMap<>(currentFluidMap);
+        invalidateIndex();
         Oneenoughfluid.LOGGER.info("Enabled reload-override mapping for this resource reload: {} fluid",
                 ReloadOverrideFluidMap.size());
-        ReloadOverrideFluidMap = new HashMap<>(currentFluidMap);
     }
 
     public static void endReloadOverride() {
@@ -207,6 +251,7 @@ public final class FluidReplacementCache {
             Oneenoughfluid.LOGGER.info("Disabled reload-override mapping: {} entries", ReloadOverrideFluidMap.size());
         }
         ReloadOverrideFluidMap = null;
+        invalidateIndex();
     }
 
     public static boolean hasReloadOverride() {

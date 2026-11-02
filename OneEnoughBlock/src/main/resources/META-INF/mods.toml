@@ -61,10 +61,10 @@ mandatory = true
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
+
 [[dependencies."${mod_id}"]]
 modId = "oneenoughitem"
 mandatory = true
-versionRange = "[1.0.6, )"
-ordering = "NONE"
+versionRange = "[1.0.9-hotfix1,)"
+ordering = "AFTER"
 side = "BOTH"
-

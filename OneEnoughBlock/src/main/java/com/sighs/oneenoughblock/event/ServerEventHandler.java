@@ -1,7 +1,7 @@
 package com.sighs.oneenoughblock.event;
 
-import cc.sighs.oelib.forge.data.DataManager;
-import cc.sighs.oelib.forge.event.DataReloadEvent;
+import cc.sighs.oelib.data.forge.DataManager;
+import cc.sighs.oelib.event.forge.DataReloadEvent;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
@@ -18,13 +18,22 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Optional;
+import net.minecraftforge.event.TagsUpdatedEvent;
 
 @Mod.EventBusSubscriber(modid = "oneenoughblock")
 public class ServerEventHandler {
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        HANDLER.rebuildReplacementCache("oeb-server-start", DataManager.get(Replacements.class));
+        HANDLER.rebuildServerReplacementCache("oeb-server-start", DataManager.get(Replacements.class));
+    }
+
+
+    @SubscribeEvent
+    public static void onTagsUpdated(TagsUpdatedEvent event) {
+        if (event.getUpdateCause() != TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) return;
+        HANDLER.rebuildServerReplacementCache("oeb-tags-ready", DataManager.get(Replacements.class));
+        BlockReplacementCache.endReloadOverride();
     }
 
     @SubscribeEvent
@@ -39,6 +48,11 @@ public class ServerEventHandler {
 
     private static class Handler extends AbstractReplacementEventHandler {
         @Override
+        protected boolean acceptLocation(ResourceLocation location) {
+            return "oeb".equals(location.getNamespace());
+        }
+
+        @Override
         protected void clearModuleCache() {
             BlockReplacementCache.clearCache();
         }
@@ -50,7 +64,7 @@ public class ServerEventHandler {
 
         @Override
         protected boolean tryResolveData(String id) {
-            return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id)) != null;
+            return ForgeRegistries.BLOCKS.containsKey(new ResourceLocation(id));
         }
 
         @Override

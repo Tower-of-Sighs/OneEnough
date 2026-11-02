@@ -1,0 +1,1 @@
+{"environment": "minecraft:default", "structure": "oneenough_regression:empty", "max_ticks": 100, "type": "minecraft:function", "function": "oneenough_regression:replacements"}

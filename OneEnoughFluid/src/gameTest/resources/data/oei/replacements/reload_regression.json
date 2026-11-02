@@ -1,0 +1,1 @@
+[{"matchItems": ["minecraft:oak_log"], "resultItems": "minecraft:netherite_block", "rules": {"data": {"loot_tables": "replace", "recipes": "replace"}}}]

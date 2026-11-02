@@ -1,19 +1,19 @@
 package com.sighs.oneenoughblock.init;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import com.mafuyu404.oneenoughitem.util.ReplacementIndex;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ReplacementUtils {
-    public static Object2ObjectOpenHashMap<Block, Block> replacementsCache = new Object2ObjectOpenHashMap<>();
-    public static Object2ObjectOpenHashMap<Block, BlockState> commonCache = new Object2ObjectOpenHashMap<>();
-    public static Object2ObjectOpenHashMap<BlockState, BlockState> propertyCache = new Object2ObjectOpenHashMap<>();
-    public static ObjectArrayList<Block> notReplacedBlocks = new ObjectArrayList<>();
+    public static final Map<Block, Block> replacementsCache = new ConcurrentHashMap<>();
+    public static final Map<Block, BlockState> commonCache = new ConcurrentHashMap<>();
+    public static final Map<BlockState, BlockState> propertyCache = new ConcurrentHashMap<>();
+    public static final Set<Block> notReplacedBlocks = ConcurrentHashMap.newKeySet();
 
     public static void onReload() {
         replacementsCache.clear();
@@ -59,14 +59,12 @@ public class ReplacementUtils {
             return replacementsCache.get(block);
         }
 
-        Optional<Block> target = BlockReplacementCache.resolveTarget(block)
-                .or(() -> BlockReplacementCache.resolveTargetByTags(block))
-                .filter(t -> t != block);
+        Block target = ReplacementIndex.resolve(block, source -> BlockReplacementCache.resolveTarget(source)
+                .or(() -> BlockReplacementCache.resolveTargetByTags(source)).orElse(null));
 
-        if (target.isPresent()) {
-            Block tb = target.get();
-            replacementsCache.put(block, tb);
-            return tb;
+        if (target != block) {
+            replacementsCache.put(block, target);
+            return target;
         } else {
             notReplacedBlocks.add(block);
             return null;

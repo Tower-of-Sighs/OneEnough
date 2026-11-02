@@ -1,7 +1,7 @@
 package com.sighs.oneenoughblock.init;
 
 import cc.sighs.oelib.config.ConfigManager;
-import cc.sighs.oelib.config.ConfigRecordCodecBuilder;
+import cc.sighs.oelib.config.ConfigSchema;
 import cc.sighs.oelib.config.ConfigUnit;
 import cc.sighs.oelib.config.datafix.ConfigFixRegistry;
 import cc.sighs.oelib.config.field.ConfigField;
@@ -13,16 +13,25 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Map;
+import java.lang.invoke.MethodHandles;
 
 public record OEBConfig(
         boolean replaceExistedBlock,
         boolean extendedBlockProperty,
-        OEIConfig.DefaultRules defaultRules
+        Map<String, Replacements.ProcessingMode> defaultRulesData,
+        Map<String, Replacements.ProcessingMode> defaultRulesTag
 ) {
     private static final String FILE_NAME = "common";
 
-    public static final ConfigUnit<OEBConfig> UNIT = ConfigRecordCodecBuilder.create(
+    public static final ConfigUnit<OEBConfig> UNIT = ConfigSchema.defineServer(
+            MethodHandles.lookup(),
             new ResourceLocation("oeb", "common_config"),
+            OEBConfig.class,
+            meta -> meta
+                    .directory("oeb")
+                    .fileName(FILE_NAME)
+                    .format(ConfigStorageFormat.JSON),
             instance -> instance.group(
                     ConfigField.bool("Replace_Existed_Block")
                             .defaultValue(false)
@@ -37,26 +46,25 @@ public record OEBConfig(
                             .defaultValue(new HashMap<>())
                             .tooltip()
                             .comment("config.oeb.default_rules.data")
-                            .forGetter(cfg -> cfg.defaultRules().data().orElseGet(HashMap::new)),
+                            .forGetter(OEBConfig::defaultRulesData),
                     ConfigField.map("Default_Rules_tag", Codec.STRING, Replacements.ProcessingMode.CODEC)
                             .defaultValue(new HashMap<>())
                             .tooltip()
                             .comment("config.oeb.default_rules.tag")
-                            .forGetter(cfg -> cfg.defaultRules().tag().orElseGet(HashMap::new))
-            ).apply(instance, (replaceExistedBlock, extendedBlockProperty, data, tag) ->
-                    new OEBConfig(
-                            replaceExistedBlock,
-                            extendedBlockProperty,
-                            new OEIConfig.DefaultRules(
-                                    data.isEmpty() ? Optional.empty() : Optional.of(data),
-                                    tag.isEmpty() ? Optional.empty() : Optional.of(tag)
-                            )
-                    )),
-            meta -> meta
-                    .directory("oeb")
-                    .fileName(FILE_NAME)
-                    .format(ConfigStorageFormat.JSON)
+                            .forGetter(OEBConfig::defaultRulesTag)
+            ).apply(instance, OEBConfig::new)
     );
+
+    public OEBConfig(boolean replaceExistedBlock, boolean extendedBlockProperty, OEIConfig.DefaultRules defaultRules) {
+        this(replaceExistedBlock, extendedBlockProperty,
+                defaultRules.data().orElseGet(HashMap::new), defaultRules.tag().orElseGet(HashMap::new));
+    }
+
+    public OEIConfig.DefaultRules defaultRules() {
+        return new OEIConfig.DefaultRules(
+                defaultRulesData.isEmpty() ? Optional.empty() : Optional.of(defaultRulesData),
+                defaultRulesTag.isEmpty() ? Optional.empty() : Optional.of(defaultRulesTag));
+    }
 
     public static OEBConfig get() {
         return UNIT.get();

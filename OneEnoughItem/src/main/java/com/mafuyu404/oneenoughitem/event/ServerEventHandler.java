@@ -1,7 +1,7 @@
 package com.mafuyu404.oneenoughitem.event;
 
-import cc.sighs.oelib.forge.data.DataManager;
-import cc.sighs.oelib.forge.event.DataReloadEvent;
+import cc.sighs.oelib.data.forge.DataManager;
+import cc.sighs.oelib.event.forge.DataReloadEvent;
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
@@ -14,13 +14,22 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Optional;
+import net.minecraftforge.event.TagsUpdatedEvent;
 
 @Mod.EventBusSubscriber(modid = Oneenoughitem.MODID)
 public class ServerEventHandler {
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        HANDLER.rebuildReplacementCache("oei-server-start", DataManager.get(Replacements.class));
+        HANDLER.rebuildServerReplacementCache("oei-server-start", DataManager.get(Replacements.class));
+    }
+
+
+    @SubscribeEvent
+    public static void onTagsUpdated(TagsUpdatedEvent event) {
+        if (event.getUpdateCause() != TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) return;
+        HANDLER.rebuildServerReplacementCache("oei-tags-ready", DataManager.get(Replacements.class));
+        ItemReplacementCache.endReloadOverride();
     }
 
     @SubscribeEvent
