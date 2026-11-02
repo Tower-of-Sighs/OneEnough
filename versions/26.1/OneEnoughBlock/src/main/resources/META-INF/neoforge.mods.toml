@@ -29,6 +29,6 @@ config = "${mod_id}.mixins.json"
 [[dependencies."${mod_id}"]]
 modId = "oneenoughitem"
 type = "required"
-versionRange = "[1.0.9-hotfix1,)"
+versionRange = "[1.0.10,)"
 ordering = "AFTER"
 side = "BOTH"
