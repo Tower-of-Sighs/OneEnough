@@ -1,0 +1,40 @@
+[versions]
+java = "17"
+moddev = "2.0.148"
+mod-publish = "1.1.0"
+mixin = "0.8.5"
+oelib = "0.3.1"
+jei = "15.20.0.104"
+
+[libraries]
+mod-publish = { module = "me.modmuss50.mod-publish-plugin:me.modmuss50.mod-publish-plugin.gradle.plugin", version.ref = "mod-publish" }
+moddev-legacyforge = { module = "net.neoforged.moddev.legacyforge:net.neoforged.moddev.legacyforge.gradle.plugin", version.ref = "moddev" }
+moddev-neoforge = { module = "net.neoforged.moddev:net.neoforged.moddev.gradle.plugin", version.ref = "moddev" }
+mixin-processor = { module = "org.spongepowered:mixin", version.ref = "mixin" }
+oelib = { module = "cc.sighs.oelib:oelib-forge-1.20.1", version.ref = "oelib" }
+oelib-bless = { module = "cc.sighs.oelib:bless-forge-1.20.1", version.ref = "oelib" }
+oelib-config = { module = "cc.sighs.oelib:config-forge-1.20.1", version.ref = "oelib" }
+oelib-data = { module = "cc.sighs.oelib:data-forge-1.20.1", version.ref = "oelib" }
+oelib-dev = { module = "cc.sighs.oelib:dev-forge-1.20.1", version.ref = "oelib" }
+oelib-event = { module = "cc.sighs.oelib:event-forge-1.20.1", version.ref = "oelib" }
+oelib-misc = { module = "cc.sighs.oelib:misc-forge-1.20.1", version.ref = "oelib" }
+oelib-network = { module = "cc.sighs.oelib:network-forge-1.20.1", version.ref = "oelib" }
+oelib-registry = { module = "cc.sighs.oelib:registry-forge-1.20.1", version.ref = "oelib" }
+oelib-renderer = { module = "cc.sighs.oelib:renderer-forge-1.20.1", version.ref = "oelib" }
+optics = { module = "com.flechazo:optics-java", version = "1.0.8-beta-j17" }
+optics-neoforge = { module = "com.flechazo:optics-java", version = "1.0.8-beta-j21" }
+kubejs = { module = "curse.maven:kubejs-238086", version = "5853326" }
+rhino = { module = "curse.maven:rhino-416294", version = "6186971" }
+architectury = { module = "curse.maven:architectury-api-419699", version = "5137938" }
+jupiter = { module = "curse.maven:jupiter-1072905", version = "6843043" }
+jei-api = { module = "mezz.jei:jei-1.20.1-forge-api", version.ref = "jei" }
+jei = { module = "mezz.jei:jei-1.20.1-forge", version.ref = "jei" }
+sakura = { module = "curse.maven:sakura-333079", version = "6955704" }
+mysterious-mountain-lib = { module = "curse.maven:mysterious-mountain-lib-368098", version = "7039998" }
+just-enough-characters = { module = "curse.maven:just-enough-characters-250702", version = "7176519" }
+just-enough-characters-neoforge = { module = "curse.maven:just-enough-characters-250702", version = "7320033" }
+emi-forge = { module = "dev.emi:emi-forge", version = "1.1.24+1.20.1" }
+emi-neoforge = { module = "dev.emi:emi-neoforge", version = "1.1.24+1.21.1" }
+
+[bundles]
+oelib-api = ["oelib-bless", "oelib-config", "oelib-data", "oelib-dev", "oelib-event", "oelib-misc", "oelib-network", "oelib-registry", "oelib-renderer"]

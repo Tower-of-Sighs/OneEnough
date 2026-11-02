@@ -4,6 +4,7 @@ import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
 import com.mafuyu404.oneenoughitem.util.Utils;
+import com.mafuyu404.oneenoughitem.util.ReplacementIndex;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
@@ -16,6 +17,45 @@ public class ItemReplacementCache {
     private static final ConcurrentHashMap<String, Replacements.Rules> ItemRulesCache = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Replacements.Rules> TagRulesCache = new ConcurrentHashMap<>();
     private static volatile Map<String, String> ReloadOverrideItemMap = null;
+    private static volatile ReplacementIndex<Item> registryIndex;
+    private static final Map<String, Collection<String>> sourceIds = new ConcurrentHashMap<>();
+
+    private static synchronized void invalidateIndex() {
+        registryIndex = null;
+        sourceIds.clear();
+    }
+
+    private static synchronized ReplacementIndex<Item> index() {
+        if (registryIndex == null) {
+            Map<Item, Item> mappings = new IdentityHashMap<>();
+            Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).forEach((sourceId, targetId) -> {
+                Item source = Utils.getItemById(sourceId);
+                Item target = Utils.getItemById(targetId);
+                if (source != null && target != null) mappings.put(source, target);
+            });
+            registryIndex = new ReplacementIndex<>(mappings);
+        }
+        return registryIndex;
+    }
+
+    public static Item replacementOf(Item source) {
+        if (!hasAnyMappings()) return null;
+        ReplacementIndex<Item> current = registryIndex;
+        return (current != null ? current : index()).replacementOf(source);
+    }
+
+    public static boolean matches(Item actual, Item expected) {
+        if (actual == expected) return true;
+        if (!hasAnyMappings() || actual == null || expected == null) return false;
+        ReplacementIndex<Item> current = registryIndex;
+        return (current != null ? current : index()).matches(actual, expected);
+    }
+
+    public static Collection<Item> sourcesOf(Item target) {
+        if (!hasAnyMappings()) return List.of();
+        ReplacementIndex<Item> current = registryIndex;
+        return (current != null ? current : index()).sourcesOf(target);
+    }
 
     public static String matchItem(String id) {
         return Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).getOrDefault(id, null);
@@ -95,6 +135,7 @@ public class ItemReplacementCache {
             }
         }
 
+        invalidateIndex();
         if (resolvedItems.isEmpty() && replacement.match().stream().noneMatch(s -> s.startsWith("#"))) {
             Oneenoughitem.LOGGER.warn("No valid items or tags resolved from match: {}", replacement.match());
         } else {
@@ -106,7 +147,7 @@ public class ItemReplacementCache {
 
     // 给 JSON 拦截层做快速判断
     public static boolean hasAnyMappings() {
-        return !ItemMapCache.isEmpty() || !TagMapCache.isEmpty();
+        return !Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).isEmpty() || !TagMapCache.isEmpty();
     }
 
     public static boolean isSourceItemId(String id) {
@@ -125,6 +166,7 @@ public class ItemReplacementCache {
         TagMapCache.clear();
         ItemRulesCache.clear();
         TagRulesCache.clear();
+        invalidateIndex();
         if (previousItemSize > 0 || previousTagSize > 0) {
             Oneenoughitem.LOGGER.info("Cleared {} cached item mappings and {} cached tag mappings",
                     previousItemSize, previousTagSize);
@@ -138,6 +180,7 @@ public class ItemReplacementCache {
         if (itemId != null && ItemMapCache.containsKey(itemId)) {
             String removed = ItemMapCache.remove(itemId);
             ItemRulesCache.remove(itemId);
+            invalidateIndex();
             Oneenoughitem.LOGGER.debug("Removed item replacement from runtime cache: {} -> {}", itemId, removed);
             return true;
         }
@@ -186,28 +229,30 @@ public class ItemReplacementCache {
     }
 
     public static Collection<String> trackSourceIdOf(String id) {
-        Collection<String> result = new HashSet<>();
-        ItemMapCache.forEach((matchItem, resultItem) -> {
-            if (resultItem.equals(id)) result.add(matchItem);
+        if (id == null || !hasAnyMappings()) return List.of();
+        return sourceIds.computeIfAbsent(id, key -> {
+            List<String> result = new ArrayList<>();
+            Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).forEach((source, target) -> {
+                if (key.equals(target)) result.add(source);
+            });
+            return List.copyOf(result);
         });
-        return result;
     }
 
     public static Collection<Item> trackSourceOf(String id) {
-        Collection<Item> result = new HashSet<>();
-        ItemMapCache.forEach((matchItem, resultItem) -> {
-            if (resultItem.equals(id)) result.add(Utils.getItemById(matchItem));
-        });
-        return result;
+        Item target = Utils.getItemById(id);
+        return target == null ? List.of() : sourcesOf(target);
     }
 
     // 开始/结束 "重载期覆盖映射"
     public static void beginReloadOverride(Map<String, String> currentItemMap) {
         if (currentItemMap == null || currentItemMap.isEmpty()) {
-            ReloadOverrideItemMap = null;
+            ReloadOverrideItemMap = Map.of();
+            invalidateIndex();
             return;
         }
         ReloadOverrideItemMap = new HashMap<>(currentItemMap);
+        invalidateIndex();
         Oneenoughitem.LOGGER.info("Enabled reload-override mapping for this resource reload: {} items",
                 ReloadOverrideItemMap.size());
     }
@@ -217,6 +262,7 @@ public class ItemReplacementCache {
             Oneenoughitem.LOGGER.info("Disabled reload-override mapping: {} entries", ReloadOverrideItemMap.size());
         }
         ReloadOverrideItemMap = null;
+        invalidateIndex();
     }
 
     public static boolean hasReloadOverride() {

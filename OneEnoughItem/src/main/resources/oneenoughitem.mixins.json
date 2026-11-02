@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.mafuyu404.oneenoughitem.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "refmap": "oneenoughitem.refmap.json",
   "mixins": [
     "CreativeModeTabMixin",
@@ -12,6 +12,7 @@
     "TagLoaderMixin"
   ],
   "client": [
+    "emi.ItemEmiStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1

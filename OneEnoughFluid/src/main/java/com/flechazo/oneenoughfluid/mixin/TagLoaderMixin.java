@@ -38,7 +38,7 @@ public abstract class TagLoaderMixin<T> {
         var snap = MixinUtils.ReplacementLoader.loadCurrentSnapshot(resourceManager);
         Map<String, String> currentMap = snap.dataMap();
         Map<String, Replacements.Rules> currentRules = snap.dataRules();
-        final boolean fallbackEnabled = currentMap.isEmpty();
+        final boolean fallbackEnabled = false;
 
         Replacements.Rules defaultRules = null;
         try {

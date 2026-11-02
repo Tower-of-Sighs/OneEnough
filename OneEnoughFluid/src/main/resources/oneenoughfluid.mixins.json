@@ -10,6 +10,7 @@
     "TagLoaderMixin"
   ],
   "client": [
+    "emi.FluidEmiStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1

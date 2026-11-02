@@ -1,7 +1,7 @@
 package com.sighs.oneenoughblock.event;
 
-import cc.sighs.oelib.forge.data.DataManager;
-import cc.sighs.oelib.forge.event.DataReloadEvent;
+import cc.sighs.oelib.data.forge.DataManager;
+import cc.sighs.oelib.event.forge.DataReloadEvent;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
 import com.mafuyu404.oneenoughitem.init.config.OEIConfig;
@@ -39,6 +39,11 @@ public class ClientEventHandler {
 
     private static class Handler extends AbstractReplacementEventHandler {
         @Override
+        protected boolean acceptLocation(ResourceLocation location) {
+            return "oeb".equals(location.getNamespace());
+        }
+
+        @Override
         protected void clearModuleCache() {
             BlockReplacementCache.clearCache();
         }
@@ -50,7 +55,7 @@ public class ClientEventHandler {
 
         @Override
         protected boolean tryResolveData(String id) {
-            return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id)) != null;
+            return ForgeRegistries.BLOCKS.containsKey(new ResourceLocation(id));
         }
 
         @Override

@@ -41,7 +41,7 @@ public abstract class TagLoaderMixin<T> {
         try {
             MixinUtils.ReplacementLoader.CurrentSnapshot snapshot = MixinUtils.ReplacementLoader.loadCurrentSnapshot(resourceManager);
             Map<String, String> currentItemMap = snapshot.dataMap();
-            if (!currentItemMap.isEmpty() && !ItemReplacementCache.hasReloadOverride()) {
+            if (currentItemMap != null) {
                 ItemReplacementCache.beginReloadOverride(currentItemMap);
             }
         } catch (Exception e) {
@@ -68,9 +68,9 @@ public abstract class TagLoaderMixin<T> {
             currentItemMap = snapshot.dataMap();
             currentItemRules = snapshot.dataRules();
         } catch (Exception e) {
-            Oneenoughitem.LOGGER.warn("Tag rewrite: failed to load current replacements (will fallback to cache if empty)", e);
+            Oneenoughitem.LOGGER.warn("Tag rewrite: failed to load current replacements (leaving tags unchanged)", e);
         }
-        final boolean fallbackEnabled = currentItemMap.isEmpty();
+        final boolean fallbackEnabled = false;
 
         Replacements.Rules defaultRules = null;
         try {

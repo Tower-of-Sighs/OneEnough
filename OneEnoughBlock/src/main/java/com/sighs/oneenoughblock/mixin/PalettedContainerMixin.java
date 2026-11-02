@@ -1,60 +1,43 @@
 package com.sighs.oneenoughblock.mixin;
 
 import com.sighs.oneenoughblock.api.IPalettedContainer;
-import com.sighs.oneenoughblock.init.BlockReplacementCache;
 import com.sighs.oneenoughblock.init.ReplacementUtils;
 import net.minecraft.util.BitStorage;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.Palette;
 import net.minecraft.world.level.chunk.PalettedContainer;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Mixin(PalettedContainer.class)
-@Implements(@Interface(iface = IPalettedContainer.class, prefix = "lazy$"))
 public class PalettedContainerMixin implements IPalettedContainer {
     @Shadow
     private volatile PalettedContainer.Data<?> data;
 
     @Override
+    @SuppressWarnings("unchecked")
     public void handleReplace() {
-        BitStorage storage = this.data.storage();
-        @SuppressWarnings("unchecked")
-        Palette<BlockState> palette = (Palette<BlockState>) this.data.palette();
-
-        Map<Integer, Integer> idMap = new HashMap<>();
-        for (int i = 0; i < palette.getSize(); i++) {
-            BlockState current = palette.valueFor(i);
-            BlockState replacement = resolveReplacement(current).orElse(null);
-            if (replacement != null) {
-                int targetId = palette.idFor(replacement);
-                idMap.put(i, targetId);
-            }
+        BitStorage storage = data.storage();
+        Palette<BlockState> palette = (Palette<BlockState>) data.palette();
+        Map<Integer, BlockState> replacements = new HashMap<>();
+        int paletteSize = palette.getSize();
+        for (int i = 0; i < paletteSize; i++) {
+            BlockState replacement = ReplacementUtils.getReplacement(palette.valueFor(i));
+            if (replacement != null) replacements.put(i, replacement);
         }
+        if (replacements.isEmpty()) return;
 
-        for (int i = 0; i < storage.getSize(); i++) {
-            int oldId = storage.get(i);
-            Integer newId = idMap.get(oldId);
-            if (newId != null) {
-                storage.set(i, newId);
-            }
+        // Adding a state can resize both palette and storage, including a single-value palette.
+        // Keep the original ids and let the container perform the resize through its public API.
+        int[] originalIds = new int[storage.getSize()];
+        for (int i = 0; i < originalIds.length; i++) originalIds[i] = storage.get(i);
+        PalettedContainer<BlockState> container = (PalettedContainer<BlockState>) (Object) this;
+        for (int i = 0; i < originalIds.length; i++) {
+            BlockState replacement = replacements.get(originalIds[i]);
+            if (replacement != null) container.set(i & 15, i >> 8, (i >> 4) & 15, replacement);
         }
-    }
-
-    private Optional<BlockState> resolveReplacement(BlockState state) {
-        return Optional.ofNullable(ReplacementUtils.getReplacement(state));
-        /*
-        Block b = state.getBlock();
-        return BlockReplacementCache.resolveTarget(b)
-                .or(() -> BlockReplacementCache.resolveTargetByTags(b))
-                .map(Block::defaultBlockState)
-                .filter(rs -> !state.is(rs.getBlock()));*/
     }
 }

@@ -54,10 +54,6 @@ public class OEFReplacementStrategy extends AbstractReplacementStrategy {
             logReplaceAction.accept(id, target);
         }
 
-        if (ctx.rule.strict() && isSourceIdWithCurrent(id, ctx)) {
-            ctx.shouldDrop = true;
-            MixinUtils.LogHelper.logDrop(ctx.dataType, id, ctx.lastMappingOrigin, ctx.lastMappingOrigin, "strict residual source-id");
-        }
     }
 
     @Override

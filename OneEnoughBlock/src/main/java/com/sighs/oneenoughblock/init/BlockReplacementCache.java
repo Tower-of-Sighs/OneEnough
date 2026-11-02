@@ -54,6 +54,7 @@ public class BlockReplacementCache {
 
     public static Optional<Block> resolveTargetByTags(Block source) {
         var tags = ForgeRegistries.BLOCKS.tags();
+        if (tags == null) return Optional.empty();
         for (var entry : TagMapCache.entrySet()) {
             String tagId = entry.getKey();
             String targetId = entry.getValue();
@@ -69,17 +70,24 @@ public class BlockReplacementCache {
     }
 
     public static void putBlockMapping(String sourceId, String targetId) {
-        if (sourceId != null && targetId != null) BlockMapCache.put(sourceId, targetId);
+        if (sourceId != null && targetId != null) {
+            BlockMapCache.put(sourceId, targetId);
+            ReplacementUtils.onReload();
+        }
     }
 
     public static void putTagMapping(String sourceTag, String targetId) {
-        if (sourceTag != null && targetId != null) TagMapCache.put(sourceTag, targetId);
+        if (sourceTag != null && targetId != null) {
+            TagMapCache.put(sourceTag, targetId);
+            ReplacementUtils.onReload();
+        }
     }
 
     public static boolean removeBlockReplacement(String blockId) {
         if (blockId != null && BlockMapCache.containsKey(blockId)) {
             String removed = BlockMapCache.remove(blockId);
             BlockRulesCache.remove(blockId);
+            ReplacementUtils.onReload();
             Oneenoughblock.LOGGER.debug("Removed fluid replacement from runtime cache: {} -> {}", blockId, removed);
             return true;
         }
@@ -90,6 +98,7 @@ public class BlockReplacementCache {
         if (tagId != null && TagMapCache.containsKey(tagId)) {
             String removed = TagMapCache.remove(tagId);
             TagRulesCache.remove(tagId);
+            ReplacementUtils.onReload();
             Oneenoughblock.LOGGER.debug("Removed tag replacement from runtime cache: {} -> {}", tagId, removed);
             return true;
         }
@@ -135,6 +144,7 @@ public class BlockReplacementCache {
         TagMapCache.clear();
         BlockRulesCache.clear();
         TagRulesCache.clear();
+        ReplacementUtils.onReload();
     }
 
     public static void putReplacement(Replacements replacement) {
@@ -161,6 +171,7 @@ public class BlockReplacementCache {
                 }
             }
         });
+        ReplacementUtils.onReload();
     }
 
     public static Optional<Replacements.Rules> getGlobalDefaultRules() {
@@ -202,10 +213,12 @@ public class BlockReplacementCache {
 
     public static void beginReloadOverride(Map<String, String> currentBlockMap) {
         if (currentBlockMap == null || currentBlockMap.isEmpty()) {
-            ReloadOverrideBlockMap = null;
+            ReloadOverrideBlockMap = Map.of();
+            ReplacementUtils.onReload();
             return;
         }
         ReloadOverrideBlockMap = new HashMap<>(currentBlockMap);
+        ReplacementUtils.onReload();
     }
 
     public static void endReloadOverride() {
@@ -213,6 +226,7 @@ public class BlockReplacementCache {
             Oneenoughblock.LOGGER.info("Disabled reload-override mapping: {} entries", ReloadOverrideBlockMap.size());
         }
         ReloadOverrideBlockMap = null;
+        ReplacementUtils.onReload();
     }
 
     public static boolean hasReloadOverride() {

@@ -43,7 +43,7 @@ public final class JsonReloadMixinHelper {
 
         Set<String> currentSourceIds = new HashSet<>(currentDataMap.keySet());
 
-        if (currentDataMap.isEmpty() && Boolean.FALSE.equals(hasAnyMappings.get())) {
+        if (currentDataMap.isEmpty()) {
             return;
         }
 
@@ -54,7 +54,7 @@ public final class JsonReloadMixinHelper {
 
         int replacedFiles = 0;
         int droppedFiles = 0;
-        final boolean fallbackEnabled = currentDataMap.isEmpty();
+        final boolean fallbackEnabled = false;
 
         for (var it = results.entrySet().iterator(); it.hasNext(); ) {
             var entry = it.next();

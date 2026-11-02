@@ -1,11 +1,12 @@
 package com.mafuyu404.oneenoughitem.event.base;
 
-import cc.sighs.oelib.forge.data.DataManager;
+import cc.sighs.oelib.data.forge.DataManager;
 import com.mafuyu404.oneenoughitem.Oneenoughitem;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
+import cc.sighs.oelib.platform.Platform;
 
 public abstract class AbstractReplacementEventHandler {
 
@@ -43,12 +44,27 @@ public abstract class AbstractReplacementEventHandler {
     }
 
     public void rebuildReplacementCache(String reason, DataManager<Replacements> manager) {
+        rebuildReplacementCache(reason, manager, false);
+    }
+
+    public void rebuildServerReplacementCache(String reason, DataManager<Replacements> manager) {
+        rebuildReplacementCache(reason, manager, true);
+    }
+
+    private void rebuildReplacementCache(String reason, DataManager<Replacements> manager, boolean retryDeferred) {
         if (manager == null) {
             Oneenoughitem.LOGGER.warn("No replacement data manager found (reason: {})", reason);
             return;
         }
+        if (retryDeferred) {
+            var server = Platform.getCurrentServer();
+            if (server != null && server.isSameThread()) {
+                manager.getDeferredBatch().retry(this::acceptLocation);
+            }
+        }
+        Map<ResourceLocation, Replacements> candidates = manager.getAllData();
         clearModuleCache();
-        for (Map.Entry<ResourceLocation, Replacements> e : manager.getAllData().entrySet()) {
+        for (Map.Entry<ResourceLocation, Replacements> e : candidates.entrySet()) {
             ResourceLocation location = e.getKey();
             if (!acceptLocation(location)) continue;
             Replacements rr = buildReplacements(e.getValue());

@@ -1,0 +1,276 @@
+package cc.sighs.oneenoughitem.init;
+
+import cc.sighs.oneenoughitem.Oneenoughitem;
+import cc.sighs.oneenoughitem.data.Replacements;
+import cc.sighs.oneenoughitem.init.config.OEIConfig;
+import cc.sighs.oneenoughitem.util.Utils;
+import cc.sighs.oneenoughitem.util.ReplacementIndex;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.core.HolderLookup;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ItemReplacementCache {
+    private static final ConcurrentHashMap<String, String> ItemMapCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, String> TagMapCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Replacements.Rules> ItemRulesCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Replacements.Rules> TagRulesCache = new ConcurrentHashMap<>();
+    private static volatile Map<String, String> ReloadOverrideItemMap = null;
+    private static volatile ReplacementIndex<Item> registryIndex;
+    private static final Map<String, Collection<String>> sourceIds = new ConcurrentHashMap<>();
+
+    private static synchronized void invalidateIndex() {
+        registryIndex = null;
+        sourceIds.clear();
+    }
+
+    private static synchronized ReplacementIndex<Item> index() {
+        if (registryIndex == null) {
+            Map<Item, Item> mappings = new IdentityHashMap<>();
+            Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).forEach((sourceId, targetId) -> {
+                Item source = Utils.getItemById(sourceId);
+                Item target = Utils.getItemById(targetId);
+                if (source != null && target != null) mappings.put(source, target);
+            });
+            registryIndex = new ReplacementIndex<>(mappings);
+        }
+        return registryIndex;
+    }
+
+    public static Item replacementOf(Item source) {
+        if (!hasAnyMappings()) return null;
+        ReplacementIndex<Item> current = registryIndex;
+        return (current != null ? current : index()).replacementOf(source);
+    }
+
+    public static boolean matches(Item actual, Item expected) {
+        if (actual == expected) return true;
+        if (!hasAnyMappings() || actual == null || expected == null) return false;
+        ReplacementIndex<Item> current = registryIndex;
+        return (current != null ? current : index()).matches(actual, expected);
+    }
+
+    public static Collection<Item> sourcesOf(Item target) {
+        if (!hasAnyMappings()) return List.of();
+        ReplacementIndex<Item> current = registryIndex;
+        return (current != null ? current : index()).sourcesOf(target);
+    }
+
+    public static String matchItem(String id) {
+        return Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).getOrDefault(id, null);
+    }
+
+    public static String matchTag(String tagId) {
+        return TagMapCache.getOrDefault(tagId, null);
+    }
+
+    public static String matchTag(Identifier tagId) {
+        return tagId != null ? matchTag(tagId.toString()) : null;
+    }
+
+    public static boolean isTagReplaced(String tagId) {
+        return tagId != null && TagMapCache.containsKey(tagId);
+    }
+
+    public static boolean isTagReplaced(Identifier tagId) {
+        return tagId != null && isTagReplaced(tagId.toString());
+    }
+
+    public static Optional<Replacements.Rules> getItemRules(String itemId) {
+        return Optional.ofNullable(ItemRulesCache.get(itemId));
+    }
+
+    public static Optional<Replacements.Rules> getTagRules(String tagId) {
+        return Optional.ofNullable(TagRulesCache.get(tagId));
+    }
+
+    private static Optional<Replacements.Rules> getGlobalDefaultRules() {
+        try {
+            var cfg = OEIConfig.get();
+            if (cfg != null) {
+                return Optional.of(cfg.defaultRules().toRules());
+            }
+        } catch (Exception ignored) {
+        }
+        return Optional.empty();
+    }
+
+    public static boolean shouldReplaceInDataDir(String itemId, String directory) {
+        return getItemRules(itemId)
+                .or(ItemReplacementCache::getGlobalDefaultRules)
+                .flatMap(Replacements.Rules::data)
+                .map(dataRules -> dataRules.get(directory))
+                .map(mode -> mode == Replacements.ProcessingMode.REPLACE)
+                .orElse(false);
+    }
+
+    public static boolean shouldReplaceInTagType(String itemId, String tagType) {
+        return getItemRules(itemId)
+                .or(ItemReplacementCache::getGlobalDefaultRules)
+                .flatMap(Replacements.Rules::tag)
+                .map(tagRules -> tagRules.get(tagType))
+                .map(mode -> mode == Replacements.ProcessingMode.REPLACE)
+                .orElse(false);
+    }
+
+    public static void putReplacement(Replacements replacement) {
+        putReplacement(replacement, null);
+    }
+
+    public static void putReplacement(Replacements replacement, HolderLookup.RegistryLookup<Item> registryLookup) {
+        List<Item> resolvedItems = Utils.resolveItemList(replacement.match(), registryLookup);
+
+        for (Item item : resolvedItems) {
+            String id = Utils.getItemRegistryName(item);
+            if (id != null) {
+                ItemMapCache.put(id, replacement.result());
+                replacement.rules().ifPresent(rules -> ItemRulesCache.put(id, rules));
+                Oneenoughitem.LOGGER.debug("Added item replacement mapping: {} -> {}", id, replacement.result());
+            }
+        }
+
+        for (String matchItem : replacement.match()) {
+            if (matchItem.startsWith("#")) {
+                String tagId = matchItem.substring(1);
+                TagMapCache.put(tagId, replacement.result());
+                replacement.rules().ifPresent(rules -> TagRulesCache.put(tagId, rules));
+                Oneenoughitem.LOGGER.debug("Added tag replacement mapping: {} -> {}", tagId, replacement.result());
+            }
+        }
+
+        invalidateIndex();
+        if (resolvedItems.isEmpty() && replacement.match().stream().noneMatch(s -> s.startsWith("#"))) {
+            Oneenoughitem.LOGGER.warn("No valid items or tags resolved from match: {}", replacement.match());
+        } else {
+            int tagCount = (int) replacement.match().stream().filter(s -> s.startsWith("#")).count();
+            Oneenoughitem.LOGGER.info("Added replacement rule for {} items and {} tags: {} -> {}",
+                    resolvedItems.size(), tagCount, replacement.match(), replacement.result());
+        }
+    }
+
+    // 给 JSON 拦截层做快速判断
+    public static boolean hasAnyMappings() {
+        return !Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).isEmpty() || !TagMapCache.isEmpty();
+    }
+
+    public static boolean isSourceItemId(String id) {
+        if (id == null) return false;
+        return Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).containsKey(id);
+    }
+
+    public static boolean isSourceTagId(String id) {
+        return id != null && TagMapCache.containsKey(id);
+    }
+
+    public static void clearCache() {
+        int previousItemSize = ItemMapCache.size();
+        int previousTagSize = TagMapCache.size();
+        ItemMapCache.clear();
+        TagMapCache.clear();
+        ItemRulesCache.clear();
+        TagRulesCache.clear();
+        invalidateIndex();
+        if (previousItemSize > 0 || previousTagSize > 0) {
+            Oneenoughitem.LOGGER.info("Cleared {} cached item mappings and {} cached tag mappings",
+                    previousItemSize, previousTagSize);
+        }
+    }
+
+    /**
+     * 从缓存中移除指定的物品替换
+     */
+    public static boolean removeItemReplacement(String itemId) {
+        if (itemId != null && ItemMapCache.containsKey(itemId)) {
+            String removed = ItemMapCache.remove(itemId);
+            ItemRulesCache.remove(itemId);
+            invalidateIndex();
+            Oneenoughitem.LOGGER.debug("Removed item replacement from runtime cache: {} -> {}", itemId, removed);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 从缓存中移除指定的标签替换
+     */
+    public static boolean removeTagReplacement(String tagId) {
+        if (tagId != null && TagMapCache.containsKey(tagId)) {
+            String removed = TagMapCache.remove(tagId);
+            TagRulesCache.remove(tagId);
+            Oneenoughitem.LOGGER.debug("Removed tag replacement from runtime cache: {} -> {}", tagId, removed);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 批量移除物品和标签替换
+     */
+    public static void removeReplacements(Collection<String> itemIds, Collection<String> tagIds) {
+        boolean changed = false;
+
+        if (itemIds != null) {
+            for (String itemId : itemIds) {
+                if (removeItemReplacement(itemId)) {
+                    changed = true;
+                }
+            }
+        }
+
+        if (tagIds != null) {
+            for (String tagId : tagIds) {
+                if (removeTagReplacement(tagId)) {
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
+            Oneenoughitem.LOGGER.info("Removed {} item replacements and {} tag replacements from runtime cache",
+                    itemIds != null ? itemIds.size() : 0, tagIds != null ? tagIds.size() : 0);
+        }
+    }
+
+    public static Collection<String> trackSourceIdOf(String id) {
+        if (id == null || !hasAnyMappings()) return List.of();
+        return sourceIds.computeIfAbsent(id, key -> {
+            List<String> result = new ArrayList<>();
+            Objects.requireNonNullElse(ReloadOverrideItemMap, ItemMapCache).forEach((source, target) -> {
+                if (key.equals(target)) result.add(source);
+            });
+            return List.copyOf(result);
+        });
+    }
+
+    public static Collection<Item> trackSourceOf(String id) {
+        Item target = Utils.getItemById(id);
+        return target == null ? List.of() : sourcesOf(target);
+    }
+
+    // 开始/结束 "重载期覆盖映射"
+    public static void beginReloadOverride(Map<String, String> currentItemMap) {
+        if (currentItemMap == null || currentItemMap.isEmpty()) {
+            ReloadOverrideItemMap = Map.of();
+            invalidateIndex();
+            return;
+        }
+        ReloadOverrideItemMap = new HashMap<>(currentItemMap);
+        invalidateIndex();
+        Oneenoughitem.LOGGER.info("Enabled reload-override mapping for this resource reload: {} items",
+                ReloadOverrideItemMap.size());
+    }
+
+    public static void endReloadOverride() {
+        if (ReloadOverrideItemMap != null) {
+            Oneenoughitem.LOGGER.info("Disabled reload-override mapping: {} entries", ReloadOverrideItemMap.size());
+        }
+        ReloadOverrideItemMap = null;
+        invalidateIndex();
+    }
+
+    public static boolean hasReloadOverride() {
+        return ReloadOverrideItemMap != null;
+    }
+}

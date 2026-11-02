@@ -158,11 +158,6 @@ public class MixinUtils {
                 ctx.mutated = true;
                 logReplaceAction.accept(id, target);
             }
-
-            if (ctx.rule.strict() && TargetResolver.isSourceIdWithCurrent(id, ctx)) {
-                ctx.shouldDrop = true;
-                LogHelper.logDrop(ctx.dataType, id, ctx.lastMappingOrigin, ctx.lastMappingOrigin, "strict residual source-id");
-            }
         }
 
         public static void tryReplaceId(JsonObject obj, String key, String id, ReplaceContext ctx) {

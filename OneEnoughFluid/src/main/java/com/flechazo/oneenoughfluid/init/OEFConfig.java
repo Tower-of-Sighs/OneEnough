@@ -1,7 +1,7 @@
 package com.flechazo.oneenoughfluid.init;
 
 import cc.sighs.oelib.config.ConfigManager;
-import cc.sighs.oelib.config.ConfigRecordCodecBuilder;
+import cc.sighs.oelib.config.ConfigSchema;
 import cc.sighs.oelib.config.ConfigUnit;
 import cc.sighs.oelib.config.field.ConfigField;
 import cc.sighs.oelib.config.model.ConfigStorageFormat;
@@ -13,37 +13,46 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
 import java.util.HashMap;
+import java.util.Map;
+import java.lang.invoke.MethodHandles;
 
 public record OEFConfig(
-        OEIConfig.DefaultRules defaultRules
+        Map<String, Replacements.ProcessingMode> defaultRulesData,
+        Map<String, Replacements.ProcessingMode> defaultRulesTag
 ) {
     private static final String FILE_NAME = "common";
 
-    public static final ConfigUnit<OEFConfig> UNIT = ConfigRecordCodecBuilder.create(
+    public static final ConfigUnit<OEFConfig> UNIT = ConfigSchema.defineServer(
+            MethodHandles.lookup(),
             new ResourceLocation("oef", "common_config"),
+            OEFConfig.class,
+            meta -> meta
+                    .directory("oef")
+                    .fileName(FILE_NAME)
+                    .format(ConfigStorageFormat.JSON),
             instance -> instance.group(
                     ConfigField.map("Default_Rules_data", Codec.STRING, Replacements.ProcessingMode.CODEC)
                             .defaultValue(new HashMap<>())
                             .tooltip()
                             .comment("config.oef.default_rules.data")
-                            .forGetter(cfg -> cfg.defaultRules().data().orElseGet(HashMap::new)),
+                            .forGetter(OEFConfig::defaultRulesData),
                     ConfigField.map("Default_Rules_tag", Codec.STRING, Replacements.ProcessingMode.CODEC)
                             .defaultValue(new HashMap<>())
                             .tooltip()
                             .comment("config.oef.default_rules.tag")
-                            .forGetter(cfg -> cfg.defaultRules().tag().orElseGet(HashMap::new))
-            ).apply(instance, (data, tag) ->
-                    new OEFConfig(
-                            new OEIConfig.DefaultRules(
-                                    data.isEmpty() ? Optional.empty() : Optional.of(data),
-                                    tag.isEmpty() ? Optional.empty() : Optional.of(tag)
-                            )
-                    )),
-            meta -> meta
-                    .directory("oef")
-                    .fileName(FILE_NAME)
-                    .format(ConfigStorageFormat.JSON)
+                            .forGetter(OEFConfig::defaultRulesTag)
+            ).apply(instance, OEFConfig::new)
     );
+
+    public OEFConfig(OEIConfig.DefaultRules defaultRules) {
+        this(defaultRules.data().orElseGet(HashMap::new), defaultRules.tag().orElseGet(HashMap::new));
+    }
+
+    public OEIConfig.DefaultRules defaultRules() {
+        return new OEIConfig.DefaultRules(
+                defaultRulesData.isEmpty() ? Optional.empty() : Optional.of(defaultRulesData),
+                defaultRulesTag.isEmpty() ? Optional.empty() : Optional.of(defaultRulesTag));
+    }
 
     public static OEFConfig get() {
         return UNIT.get();

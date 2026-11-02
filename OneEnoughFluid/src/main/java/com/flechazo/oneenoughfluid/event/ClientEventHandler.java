@@ -3,8 +3,8 @@ package com.flechazo.oneenoughfluid.event;
 import com.flechazo.oneenoughfluid.Oneenoughfluid;
 import com.flechazo.oneenoughfluid.client.gui.cache.GlobalFluidReplacementCache;
 import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
-import cc.sighs.oelib.forge.data.DataManager;
-import cc.sighs.oelib.forge.event.DataReloadEvent;
+import cc.sighs.oelib.data.forge.DataManager;
+import cc.sighs.oelib.event.forge.DataReloadEvent;
 import com.flechazo.oneenoughfluid.init.OEFConfig;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
@@ -37,6 +37,9 @@ public class ClientEventHandler {
     private static final Handler HANDLER = new Handler();
 
     private static class Handler extends AbstractReplacementEventHandler {
+        @Override
+        protected boolean acceptLocation(ResourceLocation location) { return "oef".equals(location.getNamespace()); }
+
         @Override
         protected void clearModuleCache() {
             FluidReplacementCache.clearCache();

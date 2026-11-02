@@ -1,17 +1,19 @@
 package com.mafuyu404.oneenoughitem.client;
 
 public final class ClientContext {
-    private static final ThreadLocal<Boolean> IS_BUILDING = ThreadLocal.withInitial(() -> false);
+    private static final ThreadLocal<Integer> BUILD_DEPTH = ThreadLocal.withInitial(() -> 0);
 
     public static void beginBuilding() {
-        IS_BUILDING.set(true);
+        BUILD_DEPTH.set(BUILD_DEPTH.get() + 1);
     }
 
     public static void endBuilding() {
-        IS_BUILDING.set(false);
+        int depth = BUILD_DEPTH.get() - 1;
+        if (depth <= 0) BUILD_DEPTH.remove();
+        else BUILD_DEPTH.set(depth);
     }
 
     public static boolean isBuilding() {
-        return IS_BUILDING.get();
+        return BUILD_DEPTH.get() > 0;
     }
 }

@@ -2,8 +2,8 @@ package com.flechazo.oneenoughfluid.event;
 
 import com.flechazo.oneenoughfluid.Oneenoughfluid;
 import com.flechazo.oneenoughfluid.init.FluidReplacementCache;
-import cc.sighs.oelib.forge.data.DataManager;
-import cc.sighs.oelib.forge.event.DataReloadEvent;
+import cc.sighs.oelib.data.forge.DataManager;
+import cc.sighs.oelib.event.forge.DataReloadEvent;
 import com.flechazo.oneenoughfluid.init.OEFConfig;
 import com.mafuyu404.oneenoughitem.data.Replacements;
 import com.mafuyu404.oneenoughitem.event.base.AbstractReplacementEventHandler;
@@ -18,13 +18,22 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Optional;
+import net.minecraftforge.event.TagsUpdatedEvent;
 
 @Mod.EventBusSubscriber(modid = Oneenoughfluid.MODID)
 public class ServerEventHandler {
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        HANDLER.rebuildReplacementCache("oef-server-start", DataManager.get(Replacements.class));
+        HANDLER.rebuildServerReplacementCache("oef-server-start", DataManager.get(Replacements.class));
+    }
+
+
+    @SubscribeEvent
+    public static void onTagsUpdated(TagsUpdatedEvent event) {
+        if (event.getUpdateCause() != TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) return;
+        HANDLER.rebuildServerReplacementCache("oef-tags-ready", DataManager.get(Replacements.class));
+        FluidReplacementCache.endReloadOverride();
     }
 
     @SubscribeEvent
@@ -38,6 +47,9 @@ public class ServerEventHandler {
     private static final Handler HANDLER = new Handler();
 
     private static class Handler extends AbstractReplacementEventHandler {
+        @Override
+        protected boolean acceptLocation(ResourceLocation location) { return "oef".equals(location.getNamespace()); }
+
         @Override
         protected void clearModuleCache() {
             FluidReplacementCache.clearCache();

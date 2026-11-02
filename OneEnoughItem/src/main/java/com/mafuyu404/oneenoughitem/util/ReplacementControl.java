@@ -18,20 +18,17 @@ public class ReplacementControl {
     }
 
     public static <T> T withSkipReplacement(Supplier<T> supplier) {
+        boolean previous = shouldSkipReplacement();
         setSkipReplacement(true);
         try {
             return supplier.get();
         } finally {
-            clearSkipReplacement();
+            if (previous) setSkipReplacement(true);
+            else clearSkipReplacement();
         }
     }
 
     public static void withSkipReplacement(Runnable runnable) {
-        setSkipReplacement(true);
-        try {
-            runnable.run();
-        } finally {
-            clearSkipReplacement();
-        }
+        withSkipReplacement(() -> { runnable.run(); return null; });
     }
 }
